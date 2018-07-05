@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Errors
+{% endblock %}
+
+{% block main %}
+    <div class="row pt-3">
+        <h1>One or more errors ocurred.</h1>
+    </div>
+    {% for message in messages %}
+    <div class="row pt-3">
+        <pre>{{ message }}</pre>/>
+    </div>
+    {% endfor %}
+{% endblock %}
