@@ -6,76 +6,118 @@
 
 {% block main %}
         <form action="{{ url_for('index') }}" method="post">
-            <div class="row mt-3">
-                <div class="col-8">
-                    <p class="h3">Find cheapest carparks</p>
+                <div class="row mt-3">
+                    <div class="col">
+                        <p class="h3">Find cheapest carparks</p>
+                    </div>
                 </div>
-                <div class="col-4 text-right">
-                    <input type="submit" class="btn btn-success" value="Search">
+                <div class="row mt-3">
+                    <div class="col-lg-6">
+                        <div class="row mt-3">
+                            <label for="start" class="col-sm-4 lead">from</label>
+                            <div class="col-sm-8">
+                                <input id="start" name="start" class="flatpickr flatpickr-input form-control" placeholder="Select start date and time.."
+                                    type="text" readonly="readonly">
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <label for="end" class="col-sm-4 lead">to</label>
+                            <div class="col-sm-8">
+                                <input id="end" name="end" class="flatpickr flatpickr-input form-control" placeholder="Select end date and time.." type="text"
+                                    readonly="readonly">
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <label for="center" class="col-sm-4 lead">at a place</label>
+                            <div class="col-sm-8">
+                                <input class="form-control" type="text" placeholder="Type a place or address" id="place" name="place">
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <label for="lat" class="col-sm-4 lead">or coordinates</label>
+                            <div class="col-sm-4">
+                                <input class="form-control" type="text" placeholder="latitude" id="lat" name="lat">
+                            </div>
+                            <div class="col-sm-4">
+                                <input class="form-control" type="text" placeholder="longitude" id="lng" name="lng">
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <label for="radius" class="col-sm-4 lead">within</label>
+                            <div class="col-sm-6">
+                                <input class="form-control" type="number" min="0" value="0" list="common_radii" id="radius" name="radius" />
+                                <datalist id="common_radii">
+                                    <option value="0">
+                                        <option value="200">
+                                            <option value="500">
+                                                <option value="1000">
+                                                    <option value="2000">
+                                </datalist>
+                            </div>
+                            <label class="col-sm-2 text-right lead">metres</label>
+                        </div>
+                    </div>
+                    <div class="col lg-6">
+                        <div class="map-container mt-3">
+                            <div id="map"></div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="row mt-3">
-                    <label for="start" class="col-2 lead">from</label>
-                    <div class="col-10">
-                        <input id="start" name="start" class="flatpickr flatpickr-input form-control" placeholder="Select start date and time.." type="text" readonly="readonly">
+                <div class="row mt-3">
+                    <div class="col text-center">
+                        <input type="submit" class="btn btn-success btn-lg btn-block" value="Search">
                     </div>
-            </div>
-            <div class="row mt-3">
-                    <label for="end" class="col-2 lead">to</label>
-                    <div class="col-10">
-                        <input id="end" name="end" class="flatpickr flatpickr-input form-control" placeholder="Select end date and time.." type="text" readonly="readonly">
-                    </div>
-            </div>
-            <div class="row mt-3">
-                    <label for="center" class="col-2 lead">at</label>
-                    <div class="col-sm-6">
-                        <input class="form-control" type="text" placeholder="Type a place or address" id="place" name="place">
-                    </div>
-                    <div class="col-sm-2">
-                        <input class="form-control" type="text" placeholder="lat" id="lat" name="lat">
-                    </div>
-                    <div class="col-sm-2">
-                        <input class="form-control" type="text" placeholder="lng" id="lng" name="lng">
-                    </div>
-            </div>
-            <div class="row mt-3">
-                    <label for="radius" class="col-2 lead">within</label>
-                    <div class="col-auto">
-                        <input class="form-control" type="number" min="0" value="0" list="common_radii" id="radius" name="radius"/>
-                        <datalist id="common_radii">
-                            <option value="0">
-                            <option value="200">
-                            <option value="500">
-                            <option value="1000">
-                            <option value="2000">
-                        </datalist>
-                    </div>
-                    <label class="col-auto lead">metres</label>
-            </div>
-            <div class = "map-container mt-3">
-                <div id="us1"></div>
-            </div>
-        </form>
-        <script>
-            // datetime pickers
-            flatpickr("#start", {enableTime: true, dateFormat: "Y-m-dTH:i", altInput: true, altFormat: "j F Y, h:i K", defaultDate: "today", minDate: "today"});
-            flatpickr("#end", {enableTime: true, dateFormat: "Y-m-dTH:i", altInput: true, altFormat: "j F Y, h:i K", defaultDate: "today", minDate: "today"});
+                </div>
+            </form>
+            <script>
+                // datetime pickers
 
+                var startPicker = flatpickr("#start",
+                    {
+                        enableTime: true,
+                        dateFormat: "Y-m-dTH:i",
+                        altInput: true,
+                        altFormat: "D, j F Y, h:i K",
+                        defaultDate: "today",
+                        minDate: "today",
+                        onChange: function (selectedDates, dateStr, instance) {
+                            if (endPicker.selectedDates[0] < selectedDates[0]) {
+                                endPicker.setDate(selectedDates[0], true);
+                            }
+                        }
+                    });
+                var endPicker = flatpickr("#end",
+                    {
+                        enableTime: true,
+                        dateFormat: "Y-m-dTH:i",
+                        altInput: true,
+                        altFormat: "D, j F Y, h:i K",
+                        defaultDate: "today",
+                        minDate: "today",
+                        onChange: function (selectedDates, dateStr, instance) {
+                            if (selectedDates[0] < startPicker.selectedDates[0]) {
+                                startPicker.setDate(selectedDates[0], true);
+                            }
+                        }
+                    });
 
-            $('#us1').locationpicker({
-                location: { latitude: 1.287953, longitude: 103.851784 },
-                radius: 500,
-                inputBinding: {
-                    latitudeInput: $('#lat'),
-                    longitudeInput: $('#lng'),
-                    radiusInput: $('#radius'),
-                    locationNameInput: $('#place')
-                },
-                enableAutocomplete: true,
-                autocompleteOptions: { componentRestrictions: {country: 'sg'} },
-                addressFormat: 'street_address',
-            });
-        </script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    startPicker.setDate(new Date(), true);
+                }, false);
 
-</script>
+                $('#map').locationpicker({
+                    location: { latitude: 1.287953, longitude: 103.851784 },
+                    radius: 500,
+                    inputBinding: {
+                        latitudeInput: $('#lat'),
+                        longitudeInput: $('#lng'),
+                        radiusInput: $('#radius'),
+                        locationNameInput: $('#place')
+                    },
+                    enableAutocomplete: true,
+                    autocompleteOptions: { componentRestrictions: { country: 'sg' } },
+                    addressFormat: 'street_address',
+                });
+            </script>
+
 {% endblock %}

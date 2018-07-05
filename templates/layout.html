@@ -15,14 +15,13 @@
         crossorigin="anonymous">
 
     <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 
     <!-- Google Maps -->
     <script type="text/javascript" src="https://maps.google.com/maps/api/js?key=AIzaSyBZqDJL1HZ48kHFCyqR7MfJvCeips9mQoE&libraries=places"></script>
 
     <!-- location picker -->
-    <script src="locationpicker.jquery.js"></script>
+    <script src="{{ url_for('static', filename='locationpicker.jquery.js') }}"></script>
 
     <!-- Flatpickr Datetime Picker -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
