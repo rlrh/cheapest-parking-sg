@@ -34,7 +34,7 @@ def charges(carpark, start_datetime, end_datetime):
             #print(rate)
             rate_start_datetime = datetime.combine(curr_datetime.date() + timedelta(days=(rate["sD"] - start_day)), str_to_time(rate["sT"]))
             rate_end_datetime = datetime.combine(curr_datetime.date() + timedelta(days=(rate["eD"] - start_day)), str_to_time(rate["eT"]))
-            if rate_datetime <= curr_datetime < rate_end_datetime:
+            if rate_start_datetime <= curr_datetime < rate_end_datetime:
                 curr_rate = rate
                 break
         try:
