@@ -35,9 +35,9 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">{{ result["name"] }}</h5>
-                <h6 class="card-subtitle mb-2 text-muted">{{ result["addr"] }}</h6>
-                <p class="card-text">Price: ${{ '%0.2f'| format(result["price"]/100)}}</p>
-                <p class="card-text">Distance: {{ '%0.0f'| format(result["dist"]) }} m</p>
+                <h6 class="card-subtitle mb-2 text-muted">{{ result["address"] }}</h6>
+                <p class="card-text">Price: ${{ '%0.2f'| format(result["price"]/100) }}</p>
+                <p class="card-text">Distance: {{ '%0.0f'| format(result["distance"]) }} m</p>
                 <p class="card-text">Lots: {{ result["lots"] }}</p>
                 <a href="#" class="card-link">More info</a>
             </div>
