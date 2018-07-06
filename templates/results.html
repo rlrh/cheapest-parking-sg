@@ -5,7 +5,6 @@
 {% endblock %}
 
 {% block main %}
-<div class="container">
     <div class="row mt-3">
         <div class="col">
             <h2>{{ results|length }} Results</h2>
@@ -21,24 +20,61 @@
         {% for result in results %}
             <div class="col-12 mt-3">
                 <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ result[schema["name"]] }}</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">{{ result[schema["address"]] }}</h6>
-                        <p class="card-text">Price: ${{ '%0.2f'| format(result[schema["price"]]/100) }}</p>
-                        <p class="card-text">Distance: {{ '%0.0f'| format(result[schema["distance"]]) }} m</p>
-                        <p class="card-text">Lots: {{ result[schema["lots"]] }}</p>
-                        <a href="#" class="card-link">More info</a>
+                    <div class="card-body d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">{{ result[schema["name"]] }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">{{ result[schema["address"]] }}</h6>
+                        </div>
+                        <h1 class="class="display-1 text-muted"">{{ loop.index }}</h1>
                     </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted">Price</span>
+                            <span>${{ '%0.2f'| format(result[schema["price"]]/100) }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted">Distance</span>
+                            <span>{{ '%0.0f'| format(result[schema["distance"]]) }} m</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted">Lots</span>
+                            <span class="text-success">{{ result[schema["lots"]] }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <a href="#" class="card-link">More info</a>
+                        </li>
+                    </ul>
                 </div>
             </div>
         {% endfor %}
         </div>
         <div class="col-lg-8">
-
+            <div class="map-container mt-3">
+                <div id="map"></div>
+            </div>
+            <div class="row my-3">
+                <p class="text-muted"><small>* Prices are estimated only and may not include GST.</small></p>
+            </div>
         </div>
     </div>
-    <div class="row my-3">
-        <h6 class="text-muted">*Prices are estimated only and may not include GST</h6>
-    </div>
-</div>
+    <script>
+        // Initialize and add the map
+        // The location of center
+        var center = {lat: {{ search_params["center"][0] }}, lng: {{ search_params["center"][1] }}};
+        // The map, centered
+        var map = new google.maps.Map(document.getElementById('map'), {zoom: 15, center: center});
+        // The marker, positioned at center
+        var marker = new google.maps.Marker({position: center, map: map});
+
+        {{ markers }}.forEach(function(feature, index) {
+            var location = {lat: feature[0], lng: feature[1] };
+            var marker = new google.maps.Marker({
+                position: location,
+                label: String(index + 1),
+                animation: google.maps.Animation.DROP,
+                map: map
+            });
+        });
+
+    </script>
 {% endblock %}
