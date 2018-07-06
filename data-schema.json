@@ -1,0 +1,19 @@
+{
+    "carpark_id": "id",
+    "name": "name",
+    "location": "location",
+    "address": "address",
+    "updated": "updated",
+    "rates": "rates",
+    "start_days": "start_days",
+    "start_time": "start_time",
+    "end_days": "end_days",
+    "end_time": "end_time",
+    "rate": "rate",
+    "rate_cost": "cost",
+    "rate_per": "per",
+    "rate_for": "for",
+    "distance": "distance",
+    "price": "price",
+    "lots": "lots"
+}

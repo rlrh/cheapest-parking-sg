@@ -3,25 +3,8 @@ import requests
 from datetime import date, time, datetime, timedelta
 from geopy.distance import vincenty
 
-schema = {
-    "carpark_id": "id",
-    "name": "name",
-    "location": "location",
-    "address": "address",
-    "updated": "updated",
-    "rates": "rates",
-    "start_days": "start_days",
-    "start_time": "start_time",
-    "end_days": "end_days",
-    "end_time": "end_time",
-    "rate": "rate",
-    "rate_cost": "cost",
-    "rate_per": "per",
-    "rate_for": "for",
-    "distance": "distance",
-    "price": "price",
-    "lots": "lots",
-}
+with open("data-schema.json", "r") as data_schema_file:
+    schema = json.load(data_schema_file)
 
 def str_to_time(string):
     split = list(map(lambda number: int(number), string.split(":")))
@@ -29,6 +12,7 @@ def str_to_time(string):
         hour, minute = split
         return time(hour=hour, minute=minute)
     elif len(split) == 3:
+        hour, minute, second = split
         return time(hour=hour, minute=minute, second=second)
     else:
         raise Exception("Invalid time string.")
