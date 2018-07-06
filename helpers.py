@@ -32,16 +32,14 @@ def charges(carpark, start_datetime, end_datetime):
         # find matching rate interval TODO: bisection search
         for rate in carpark_rates:
             #print(rate)
-            block_start_datetime = datetime.combine(curr_datetime.date() + timedelta(days=(rate["sD"] - start_day)), str_to_time(rate["sT"]))
-            #block_end_datetime = datetime.combine(curr_datetime.date() + timedelta(days=(rate["sD"] - start_day)) + timedelta(days=(rate["eD"] - rate["sD"])), str_to_time(rate["eT"]))
-            block_end_datetime = datetime.combine(curr_datetime.date() + timedelta(days=(rate["eD"] - start_day)), str_to_time(rate["eT"]))
-            if block_start_datetime <= curr_datetime < block_end_datetime:
+            rate_start_datetime = datetime.combine(curr_datetime.date() + timedelta(days=(rate["sD"] - start_day)), str_to_time(rate["sT"]))
+            rate_end_datetime = datetime.combine(curr_datetime.date() + timedelta(days=(rate["eD"] - start_day)), str_to_time(rate["eT"]))
+            if rate_datetime <= curr_datetime < rate_end_datetime:
                 curr_rate = rate
                 break
         try:
             charges = curr_rate["rate"]
             block_start_datetime = datetime.combine(curr_datetime.date(), str_to_time(curr_rate["sT"]))
-            days=(curr_rate["eD"] - curr_rate["sD"])
             block_end_datetime = datetime.combine(curr_datetime.date() + timedelta(days=(curr_rate["eD"] - curr_rate["sD"])), str_to_time(curr_rate["eT"]))
         except:
             return "No rate available for chosen interval"
@@ -51,7 +49,7 @@ def charges(carpark, start_datetime, end_datetime):
             cents, per_duration, for_duration = charge.values()
 
             if for_duration != 0: # initial charges
-                charge_end_datetime = curr_datetime + timedelta(minutes=for_duration)
+                charge_end_datetime = min(curr_datetime + timedelta(minutes=for_duration), block_end_datetime)
             else: # subsequent charges
                 charge_end_datetime = block_end_datetime
 
