@@ -3,9 +3,6 @@ import requests
 from datetime import date, time, datetime, timedelta
 from geopy.distance import vincenty
 
-with open("data-schema.json", "r") as data_schema_file:
-    schema = json.load(data_schema_file)
-
 def str_to_time(string):
     split = list(map(lambda number: int(number), string.split(":")))
     if len(split) == 2:
@@ -18,7 +15,7 @@ def str_to_time(string):
         raise Exception("Invalid time string.")
 
 # returns integer representing price calculated for duration at carpark in cents
-def charges(carpark, start_datetime, end_datetime):
+def carpark_charges(carpark, start_datetime, end_datetime, schema):
 
     result = 0
 
@@ -79,16 +76,16 @@ def all_carparks_availability():
     return r.json()["value"]
 
 # returns a dictionary with key as carpark id and value as available lots
-def carparks_availability(carparks):
+def carparks_availability(carparks, schema):
     result = {}
-    carpark_ids = list(map(lambda carpark: str(carpark["id"]), carparks))
+    carpark_ids = list(map(lambda carpark: str(carpark[schema["carpark_id"]]), carparks))
     data = list(filter(lambda carpark: carpark["CarParkID"] in carpark_ids, all_carparks_availability() ))
     for datum in data:
         result[datum["CarParkID"]] = datum["AvailableLots"]
     return result
 
 # returns a list of nearby carparks with each element as the complete data for each carpark, plus distance
-def nearby_carparks(data, center_location, radius):
+def nearby_carparks(data, center_location, radius, schema):
     result = []
     for carpark in data:
         distance = vincenty(center_location, carpark[schema["location"]]).m
@@ -99,21 +96,21 @@ def nearby_carparks(data, center_location, radius):
 
 
 # returns a list of nearby carparks with each element as the complete data for each carpark, plus price and lots
-def cheapest_carparks_within_radius(data, center_location, radius, start_datetime, end_datetime):
+def cheapest_carparks_within_radius(data, center_location, radius, start_datetime, end_datetime, schema):
 
-    valid_data = nearby_carparks(data, center_location, radius)
+    valid_data = nearby_carparks(data, center_location, radius, schema)
     if not valid_data:
         return []
-    available_lots = carparks_availability(valid_data)
+    available_lots = carparks_availability(valid_data, schema)
     for carpark in valid_data:
-        carpark[schema["price"]] = charges(carpark, start_datetime, end_datetime)
+        carpark[schema["price"]] = carpark_charges(carpark, start_datetime, end_datetime, schema)
         if carpark[schema["carpark_id"]] in available_lots:
             carpark[schema["lots"]] = available_lots[carpark[schema["carpark_id"]]]
         else:
             carpark[schema["lots"]] = "Unknown"
     return valid_data
 
-def sort_carparks(data, price_first=True):
+def sort_carparks(data, schema, price_first=True):
     if price_first == True:
         data.sort(key = lambda carpark: carpark[schema["distance"]])
         data.sort(key = lambda carpark: carpark[schema["price"]])

@@ -6,33 +6,15 @@ from geopy.distance import vincenty
 from helpers import *
 
 data_file = "data-minified.json"
-# update schema in helpers.py if data format changes
-"""
-schema = {
-    "carpark_id": "id",
-    "name": "name",
-    "location": "location",
-    "address": "address",
-    "updated": "updated",
-    "rates": "rates",
-    "start_days": "start_days",
-    "start_time": "start_time",
-    "end_days": "end_days",
-    "end_time": "end_time",
-    "rate": "rate",
-    "rate_cost": "cost",
-    "rate_per": "per",
-    "rate_for": "for",
-    "distance": "distance",
-    "price": "price",
-    "lots": "lots",
-}
-"""
+data_schema_file = "data-schema.json"
 
 app = Flask(__name__)
+app.config["DEBUG"] = True
 
 with app.open_resource(data_file) as f:
     data = json.load(f)
+with app.open_resource(data_schema_file) as schema_file:
+    schema = json.load(schema_file)
 
 @app.route('/', methods=["GET", "POST"])
 def index():
@@ -63,8 +45,8 @@ def index():
             messages.append("Radius invalid.")
             messages.append(str(e))
         try:
-            cheapest_carparks = cheapest_carparks_within_radius(data, center_loc, radius, from_datetime, to_datetime)
-            sort_carparks(cheapest_carparks)
+            cheapest_carparks = cheapest_carparks_within_radius(data, center_loc, radius, from_datetime, to_datetime, schema)
+            sort_carparks(cheapest_carparks, schema)
         except Exception as e:
             messages.append("Error ocurred while searching for carparks")
             messages.append(str(e))
