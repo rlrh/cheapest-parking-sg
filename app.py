@@ -52,7 +52,7 @@ def index():
             messages.append(str(e))
 
         if not messages:
-            return render_template("results.html", start=from_datetime, end=to_datetime, center=str(center_loc), radius=radius, results=cheapest_carparks)
+            return render_template("results.html", start=from_datetime, end=to_datetime, center=str(center_loc), radius=radius, results=cheapest_carparks, schema=schema)
         else:
             return render_template("apology.html", messages=messages)
         """
