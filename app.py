@@ -51,7 +51,7 @@ def index():
             messages.append("Error ocurred while searching for carparks")
             messages.append(str(e))
 
-        search_params = {"start": from_datetime, "end": to_datetime, "center": str(center_loc), "radius": radius}
+        search_params = {"start": from_datetime.strftime("%a, %-d %B %Y, %-I:%M %p"), "end": to_datetime.strftime("%a, %-d %B %Y, %-I:%M %p"), "center": str(center_loc), "radius": radius, "place":request.form["place"]}
 
         if not messages:
             return render_template("results.html", search_params=search_params, results=cheapest_carparks, schema=schema)

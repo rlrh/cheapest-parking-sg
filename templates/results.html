@@ -6,45 +6,38 @@
 
 {% block main %}
 <div class="container">
-    <div class="row">
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">Start</th>
-                <th scope="col">End</th>
-                <th scope="col">Center</th>
-                <th scope="col">Radius</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{ search_params["start"] }}</td>
-                <td>{{ search_params["end"] }}</td>
-                <td>{{ search_params["center"] }}</td>
-                <td>{{ search_params["radius"] }} m</td>
-            </tr>
-        </tbody>
-    </table>
-    </div>
-    <div class="row">
-        <h1>{{ results|length }} Results</h1>
-    </div>
-    <div class="row">
-    {% for result in results %}
-
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">{{ result[schema["name"]] }}</h5>
-                <h6 class="card-subtitle mb-2 text-muted">{{ result[schema["address"]] }}</h6>
-                <p class="card-text">Price: ${{ '%0.2f'| format(result[schema["price"]]/100) }}</p>
-                <p class="card-text">Distance: {{ '%0.0f'| format(result[schema["distance"]]) }} m</p>
-                <p class="card-text">Lots: {{ result[schema["lots"]] }}</p>
-                <a href="#" class="card-link">More info</a>
-            </div>
+    <div class="row mt-3">
+        <div class="col">
+            <h2>{{ results|length }} Results</h2>
         </div>
-    {% endfor %}
     </div>
     <div class="row">
+        <div class="col">
+            <p class="lead">from <mark>{{ search_params["start"] }}</mark> to <mark>{{ search_params["end"] }}</mark> within <mark>{{ search_params["radius"] }}m</mark> of <mark>{{ search_params["place"] }}</mark></p>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-lg-4">
+        {% for result in results %}
+            <div class="col-12 mt-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ result[schema["name"]] }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ result[schema["address"]] }}</h6>
+                        <p class="card-text">Price: ${{ '%0.2f'| format(result[schema["price"]]/100) }}</p>
+                        <p class="card-text">Distance: {{ '%0.0f'| format(result[schema["distance"]]) }} m</p>
+                        <p class="card-text">Lots: {{ result[schema["lots"]] }}</p>
+                        <a href="#" class="card-link">More info</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+        <div class="col-lg-8">
+
+        </div>
+    </div>
+    <div class="row my-3">
         <h6 class="text-muted">*Prices are estimated only and may not include GST</h6>
     </div>
 </div>

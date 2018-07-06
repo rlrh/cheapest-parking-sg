@@ -8,7 +8,7 @@
         <form action="{{ url_for('index') }}" method="post">
                 <div class="row mt-3">
                     <div class="col">
-                        <p class="h3">Find cheapest carparks</p>
+                        <h2>Find cheapest carparks</h2>
                     </div>
                 </div>
                 <div class="row mt-3">
@@ -63,7 +63,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="row mt-3">
+                <div class="row my-3">
                     <div class="col text-center">
                         <input type="submit" class="btn btn-success btn-lg btn-block" value="Search">
                     </div>
@@ -71,7 +71,7 @@
             </form>
             <script>
                 // datetime pickers
-
+                var time_diff = 120;
                 var startPicker = flatpickr("#start",
                     {
                         enableTime: true,
@@ -103,6 +103,7 @@
 
                 document.addEventListener('DOMContentLoaded', function () {
                     startPicker.setDate(new Date(), true);
+                    endPicker.setDate(new Date(startPicker.selectedDates[0].getTime() + time_diff*60000), true);
                 }, false);
 
                 $('#map').locationpicker({
