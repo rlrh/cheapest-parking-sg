@@ -5,8 +5,32 @@ from datetime import date, time, datetime, timedelta
 from geopy.distance import vincenty
 from helpers import *
 
-app = Flask(__name__)
 data_file = "data-minified.json"
+# update schema in helpers.py if data format changes
+"""
+schema = {
+    "carpark_id": "id",
+    "name": "name",
+    "location": "location",
+    "address": "address",
+    "updated": "updated",
+    "rates": "rates",
+    "start_days": "start_days",
+    "start_time": "start_time",
+    "end_days": "end_days",
+    "end_time": "end_time",
+    "rate": "rate",
+    "rate_cost": "cost",
+    "rate_per": "per",
+    "rate_for": "for",
+    "distance": "distance",
+    "price": "price",
+    "lots": "lots",
+}
+"""
+
+app = Flask(__name__)
+
 with app.open_resource(data_file) as f:
     data = json.load(f)
 

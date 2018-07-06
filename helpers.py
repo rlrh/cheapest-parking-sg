@@ -3,25 +3,25 @@ import requests
 from datetime import date, time, datetime, timedelta
 from geopy.distance import vincenty
 
-# datafile settings
-d_file = "data-minified.json"
-d_id = "id"
-d_name = "name"
-d_location = "location"
-d_address = "address"
-d_updated = "updated"
-d_rates = "rates"
-d_start_days = "start_days"
-d_start_time = "start_time"
-d_end_days = "end_days"
-d_end_time = "end_time"
-d_rate = "rate"
-d_rate_cost = "cost"
-d_rate_per = "per"
-d_rate_for = "for"
-d_distance = "distance"
-d_price = "price"
-d_lots = "lots"
+schema = {
+    "carpark_id": "id",
+    "name": "name",
+    "location": "location",
+    "address": "address",
+    "updated": "updated",
+    "rates": "rates",
+    "start_days": "start_days",
+    "start_time": "start_time",
+    "end_days": "end_days",
+    "end_time": "end_time",
+    "rate": "rate",
+    "rate_cost": "cost",
+    "rate_per": "per",
+    "rate_for": "for",
+    "distance": "distance",
+    "price": "price",
+    "lots": "lots",
+}
 
 def str_to_time(string):
     split = list(map(lambda number: int(number), string.split(":")))
@@ -38,7 +38,7 @@ def charges(carpark, start_datetime, end_datetime):
 
     result = 0
 
-    carpark_rates = carpark[d_rates]
+    carpark_rates = carpark[schema["rates"]]
 
     # Iterate until reach end datetime
     curr_datetime = start_datetime
@@ -52,9 +52,9 @@ def charges(carpark, start_datetime, end_datetime):
         # find matching rate
         for rate in carpark_rates:
             # Run through all days conatined in rate
-            for i, day in enumerate(rate[d_start_days]):
-                rate_start_datetime = datetime.combine(curr_datetime.date() + timedelta(days=(day - start_day)), str_to_time(rate[d_start_time]))
-                rate_end_datetime = datetime.combine(curr_datetime.date() + timedelta(days=(rate[d_end_days][i] - start_day)), str_to_time(rate[d_end_time]))
+            for i, day in enumerate(rate[schema["start_days"]]):
+                rate_start_datetime = datetime.combine(curr_datetime.date() + timedelta(days=(day - start_day)), str_to_time(rate[schema["start_time"]]))
+                rate_end_datetime = datetime.combine(curr_datetime.date() + timedelta(days=(rate[schema["end_days"]][i] - start_day)), str_to_time(rate[schema["end_time"]]))
                 if rate_start_datetime <= curr_datetime < rate_end_datetime:
                     curr_rate = rate
                     curr_day_idx = i
@@ -63,7 +63,7 @@ def charges(carpark, start_datetime, end_datetime):
 
         # Proceed if there is a matching rate
         try:
-            charges = curr_rate[d_rate]
+            charges = curr_rate[schema["rate"]]
         except:
             return -1
 
@@ -107,10 +107,10 @@ def carparks_availability(carparks):
 def nearby_carparks(data, center_location, radius):
     result = []
     for carpark in data:
-        distance = vincenty(center_location, carpark[d_location]).m
+        distance = vincenty(center_location, carpark[schema["location"]]).m
         if distance <= radius:
             result.append(carpark)
-            result[-1][d_distance] = distance
+            result[-1][schema["distance"]] = distance
     return result
 
 
@@ -122,17 +122,17 @@ def cheapest_carparks_within_radius(data, center_location, radius, start_datetim
         return []
     available_lots = carparks_availability(valid_data)
     for carpark in valid_data:
-        carpark[d_price] = charges(carpark, start_datetime, end_datetime)
-        if carpark[d_id] in available_lots:
-            carpark[d_lots] = available_lots[carpark[d_id]]
+        carpark[schema["price"]] = charges(carpark, start_datetime, end_datetime)
+        if carpark[schema["carpark_id"]] in available_lots:
+            carpark[schema["lots"]] = available_lots[carpark[schema["carpark_id"]]]
         else:
-            carpark[d_lots] = "Unknown"
+            carpark[schema["lots"]] = "Unknown"
     return valid_data
 
 def sort_carparks(data, price_first=True):
     if price_first == True:
-        data.sort(key = lambda carpark: carpark[d_distance])
-        data.sort(key = lambda carpark: carpark[d_price])
+        data.sort(key = lambda carpark: carpark[schema["distance"]])
+        data.sort(key = lambda carpark: carpark[schema["price"]])
     else:
-        data.sort(key = lambda carpark: carpark[d_price])
-        data.sort(key = lambda carpark: carpark[d_distance])
+        data.sort(key = lambda carpark: carpark[schema["price"]])
+        data.sort(key = lambda carpark: carpark[schema["distance"]])
