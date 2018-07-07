@@ -35,26 +35,34 @@
                         </div>
                         <div class="row mt-3">
                             <label for="lat" class="col-sm-4 lead">or coordinates</label>
-                            <div class="col-sm-4">
-                                <input class="form-control" type="text" placeholder="latitude" id="lat" name="lat">
-                            </div>
-                            <div class="col-sm-4">
-                                <input class="form-control" type="text" placeholder="longitude" id="lng" name="lng">
+                            <div class="col-sm-8">
+                                <div class="row">
+                                    <div class="col input-group">
+                                        <input class="form-control" type="text" placeholder="latitude" id="lat" name="lat">
+                                        <input class="form-control" type="text" placeholder="longitude" id="lng" name="lng">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="row mt-3">
                             <label for="radius" class="col-sm-4 lead">within</label>
-                            <div class="col-sm-6">
-                                <input class="form-control" type="number" min="0" value="0" list="common_radii" id="radius" name="radius" />
-                                <datalist id="common_radii">
-                                    <option value="0">
-                                        <option value="200">
+                            <div class="col-sm-8">
+                                <div class="row">
+                                    <div class="col input-group">
+                                        <input class="form-control" type="number" min="0" value="0" list="common_radii" id="radius" name="radius" />
+                                        <datalist id="common_radii">
+                                            <option value="0">
+                                            <option value="200">
                                             <option value="500">
-                                                <option value="1000">
-                                                    <option value="2000">
-                                </datalist>
+                                            <option value="1000">
+                                            <option value="2000">
+                                        </datalist>
+                                        <div class="input-group-append">
+                                            <div class="input-group-text">metres</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <label class="col-sm-2 text-right lead">metres</label>
                         </div>
                     </div>
                     <div class="col lg-6">
