@@ -114,6 +114,9 @@
                     endPicker.setDate(new Date(startPicker.selectedDates[0].getTime() + time_diff*60000), true);
                 }, false);
 
+                var marker_locations = {{ markers }}.map(function(carpark) { return {lat: carpark[0], lng: carpark[1] } })
+                console.log(marker_locations)
+
                 $('#map').locationpicker({
                     location: { latitude: 1.287953, longitude: 103.851784 },
                     radius: 500,
@@ -128,17 +131,15 @@
                     addressFormat: 'street_address',
                     oninitialized: function(component) {
                         var mapContext = $(component).locationpicker('map').map;
-                        {{ markers }}.forEach(function(feature, index) {
-                            var location = {lat: feature[0], lng: feature[1] };
-                            console.log(location);
-                            var marker = new google.maps.Marker({
+                        var markers = marker_locations.map(function(location, i) {
+                            return new google.maps.Marker({
                                 position: location,
-                                label: "P",
-                                map: mapContext
+                                label: "P"
                             });
                         });
+                        var markerCluster = new MarkerClusterer(mapContext, markers, {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
                     }
                 });
             </script>
-
+            <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
 {% endblock %}
