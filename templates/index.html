@@ -126,6 +126,18 @@
                     enableAutocomplete: true,
                     autocompleteOptions: { componentRestrictions: { country: 'sg' } },
                     addressFormat: 'street_address',
+                    oninitialized: function(component) {
+                        var mapContext = $(component).locationpicker('map').map;
+                        {{ markers }}.forEach(function(feature, index) {
+                            var location = {lat: feature[0], lng: feature[1] };
+                            console.log(location);
+                            var marker = new google.maps.Marker({
+                                position: location,
+                                label: "P",
+                                map: mapContext
+                            });
+                        });
+                    }
                 });
             </script>
 

@@ -65,4 +65,5 @@ def index():
             return render_template("apology.html", messages=[error])
         """
     else:
-        return render_template("index.html")
+        markers = list(map(lambda carpark: carpark[schema["location"]], data))
+        return render_template("index.html", markers=markers, schema=schema)
