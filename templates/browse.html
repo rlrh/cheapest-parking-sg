@@ -74,9 +74,11 @@
         <div class="flex-grow-1" id="map"></div>
     </div>
     <script>
-        {% if id != -1 %}
-            console.log({{ id }});
-        {% endif %}
+        // !IMPORTANT! id is from url params, index is marker index
+        var schema = {{ schema | safe }};
+        var carparks = {{ data | safe }};
+        // console.log(schema);
+        // console.log(carparks);
 
         function initialize(map) {
 
@@ -100,7 +102,7 @@
                     info.close();
                 });
             autocomplete.addListener('place_changed', function () {
-                //infowindow.close();
+                info.close();
                 var place = autocomplete.getPlace();
                 if (!place.geometry) {
                     // User entered the name of a Place that was not suggested and
@@ -123,21 +125,23 @@
                 contentString =
                     "<div class='card-body'>"
                     + "<h5 class='card-title'>"
-                    + String(carpark[ "{{ schema["name"]}}" ])
+                    + String(carpark[schema.name])
                     + "</h5>"
                     + "<h6 class='card-subtitle mb-3 text-muted'>"
-                    + String(carpark[ "{{ schema["address"] }}" ])
+                    + String(carpark[schema.address])
                     + "</h6>";
 
-                carpark["{{ schema["human_rates"] }}"].forEach(function (rate) {
+                carpark[schema.human_rates].forEach(function (rate) {
                     temp =
-                        "<strong class='text-primary'>" + rate["{{ schema["human_interval"] }}"] + "</strong>"
-                        + "<p class='text-muted'>" + rate["{{ schema["human_price"]  }}"] + "</p>"
+                        "<strong class='text-primary'>" + rate[schema.human_interval] + "</strong>"
+                        + "<p class='text-muted'>" + rate[schema.human_price] + "</p>"
 
                     contentString += temp;
                 });
                 var link = "{{ url_for('index', id=index) }}" + String(index);
-                contentString += "<a class='card-link text-info' href='" + link + "' class='card-link'>Calculate Parking Charges</a>";
+                contentString += ("<a class='card-link text-info' href='" + link + "' class='card-link'>Calculate Parking Charges</a>");
+                var directions_link = "https://www.google.com/maps/dir/?api=1&destination=" + carpark[schema.location][0] + "," + carpark[schema.location][1] + "&travelmode=driving";
+                contentString += ("<a class='card-link text-info' href='" + directions_link + "' class='card-link'>Get Directions</a>");
                 contentString += "</div>";
 
                 // set info window's content
@@ -148,9 +152,8 @@
             }
 
             // add markers
-            carparks = {{ data | safe }}
             carparks.forEach(function (carpark, index) {
-                var latLng = { lat: carpark["{{ schema["location"] }}"][0], lng: carpark["{{ schema["location"] }}"][1] };
+                var latLng = { lat: carpark[schema.location][0], lng: carpark[schema.location][1] };
                 var marker = new google.maps.Marker({
                     position: latLng,
                     label: "P",

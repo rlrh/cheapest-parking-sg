@@ -11,8 +11,10 @@
             <h3>{{ results|length }} Results</h3>
         </div>
     </div>
-    {% endif %}
     <div class="form-row justify-content-start">
+    {% else %}
+    <div class="form-row mt-3 justify-content-start">
+    {% endif %}
         <div class="col-auto mt-2">
             <span class="lead text-justify">From <span class="p-1 rounded border bg-light">{{ search_params["start"] }}</span> </span>
         </div>
@@ -65,8 +67,9 @@
                             <span class="text-muted">Lots</span>
                             <span class="text-success">{{ result[schema["lots"]] }}</span>
                         </li>
-                        <li class="list-group-item d-flex justify-content-between">
+                        <li class="list-group-item d-flex justify-content-start">
                             <a href="{{ url_for('browse', id=result[schema['index']]) }}" class="card-link text-info">More Info</a>
+                            <a href="https://www.google.com/maps/dir/?api=1&destination={{result[schema['location']][0]}},{{result[schema['location']][1]}}&travelmode=driving" class="card-link text-info">Get Directions</a>
                         </li>
                     </ul>
                 </div>

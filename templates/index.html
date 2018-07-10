@@ -15,7 +15,7 @@
                         {% endif %}
                     </div>
                 </div>
-                <div class="row mt-3">
+                <div class="row">
                     <div class="col-lg-6">
                         <div class="row mt-3">
                             <label for="start" class="col-2 lead">From</label>
@@ -136,7 +136,7 @@
                 }, false);
 
                 var marker_locations = {{ markers }}.map(function(carpark) { return {lat: carpark[0], lng: carpark[1] } })
-                console.log(marker_locations)
+                // console.log(marker_locations)
 
                 $('#map').locationpicker({
                     {% if center is defined%}
