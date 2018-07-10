@@ -79,6 +79,11 @@
 
             </form>
             <script>
+                {% if center %}
+                        console.log({{ center }});
+                {% endif %}
+
+
                 // datetime pickers
                 var time_diff = 120;
                 var startPicker = flatpickr("#start",
@@ -119,8 +124,13 @@
                 console.log(marker_locations)
 
                 $('#map').locationpicker({
-                    location: { latitude: 1.287953, longitude: 103.851784 },
-                    radius: 500,
+                    {% if center %}
+                        location: { latitude: {{ center[0] }}, longitude: {{ center[1] }} },
+                        radius: 50,
+                    {% else %}
+                        location: { latitude: 1.287953, longitude: 103.851784 },
+                        radius: 500,
+                    {% endif %}
                     inputBinding: {
                         latitudeInput: $('#lat'),
                         longitudeInput: $('#lng'),

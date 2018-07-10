@@ -4,6 +4,7 @@
     "location": "location",
     "address": "address",
     "updated": "updated",
+    "remarks": "remarks",
     "rates": "rates",
     "start_days": "start_days",
     "start_time": "start_time",
@@ -16,5 +17,8 @@
     "distance": "distance",
     "price": "price",
     "lots": "lots",
-    "index": "index"
+    "index": "index",
+    "human_rates": "rates2",
+    "human_interval": "interval",
+    "human_price": "price"
 }

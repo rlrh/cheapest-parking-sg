@@ -28,7 +28,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-    <title>Cheapest Parking SG: {% block title %}{% endblock %}</title>
+    <title>Carparks SG: {% block title %}{% endblock %}</title>
 
     <style>
         /* Always set the map height explicitly to define the size of the div
@@ -65,7 +65,10 @@
 <body>
     <nav class="navbar navbar-expand-sm navbar-dark bg-info">
         <div class="container d-flex justify-content-between">
-            <a class="navbar-brand" href="{{ url_for('index') }}"><i class="fas fa-parking"></i><span class="mx-3">Carparks SG</span></a>
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-parking"></i>
+                <span class="mx-1">Carparks SG</span>
+            </a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
                 aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -78,7 +81,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Browse All
+                        <a class="nav-link" href="{{ url_for('browse') }}">Browse All
                         </a>
                     </li>
                 </ul>

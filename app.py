@@ -5,7 +5,7 @@ from datetime import date, time, datetime, timedelta
 from geopy.distance import vincenty
 from helpers import *
 
-data_file = "data-minified.json"
+data_file = "data-test.json"
 data_schema_file = "data-schema.json"
 
 app = Flask(__name__)
@@ -59,11 +59,15 @@ def index():
             return render_template("results.html", search_params=search_params, results=cheapest_carparks, schema=schema)
         else:
             return render_template("apology.html", messages=messages)
-        """
-        except Exception as e:
-            error = str(e)
-            return render_template("apology.html", messages=[error])
-        """
     else:
+        carpark_id = int(request.args.get('id', -1))
         markers = list(map(lambda carpark: carpark[schema["location"]], data))
-        return render_template("index.html", markers=markers, schema=schema)
+        if carpark_id != -1:
+            center = data[carpark_id][schema["location"]]
+            return render_template("index.html", markers=markers, schema=schema, center=center)
+        else:
+            return render_template("index.html", markers=markers, schema=schema)
+
+@app.route('/browse')
+def browse():
+    return render_template("browse.html", data=data, schema=schema)
