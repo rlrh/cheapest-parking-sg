@@ -8,7 +8,11 @@
         <form action="{{ url_for('index') }}" method="post">
                 <div class="row mt-3">
                     <div class="col">
-                        <h3>Find cheapest carparks</h3>
+                        {% if name is defined %}
+                            <h3>Calculate parking charges for {{name}}</h3>
+                        {% else %}
+                            <h3>Find cheapest carparks</h3>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="row mt-3">
@@ -79,10 +83,9 @@
 
             </form>
             <script>
-                {% if center %}
-                        console.log({{ center }});
+                {% if center is defined %}
+                     // console.log({{ center }});
                 {% endif %}
-
 
                 // datetime pickers
                 var time_diff = 120;
@@ -124,7 +127,7 @@
                 console.log(marker_locations)
 
                 $('#map').locationpicker({
-                    {% if center %}
+                    {% if center is defined%}
                         location: { latitude: {{ center[0] }}, longitude: {{ center[1] }} },
                         radius: 50,
                     {% else %}

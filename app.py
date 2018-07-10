@@ -13,6 +13,7 @@ app.config["DEBUG"] = True
 
 with app.open_resource(data_file) as f:
     data = json.load(f)
+    data_length = len(data)
 with app.open_resource(data_schema_file) as schema_file:
     schema = json.load(schema_file)
 
@@ -62,12 +63,14 @@ def index():
     else:
         carpark_id = int(request.args.get('id', -1))
         markers = list(map(lambda carpark: carpark[schema["location"]], data))
-        if carpark_id != -1:
+        if carpark_id > -1 and carpark_id < data_length:
             center = data[carpark_id][schema["location"]]
-            return render_template("index.html", markers=markers, schema=schema, center=center)
+            name = data[carpark_id][schema["name"]]
+            return render_template("index.html", markers=markers, schema=schema, center=center, name=name)
         else:
             return render_template("index.html", markers=markers, schema=schema)
 
 @app.route('/browse')
 def browse():
-    return render_template("browse.html", data=data, schema=schema)
+    carpark_id = int(request.args.get('id', -1))
+    return render_template("browse.html", data=data, schema=schema, id=carpark_id)
