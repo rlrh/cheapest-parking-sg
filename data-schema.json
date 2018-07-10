@@ -15,5 +15,6 @@
     "rate_for": "for",
     "distance": "distance",
     "price": "price",
-    "lots": "lots"
+    "lots": "lots",
+    "index": "index"
 }

@@ -87,11 +87,12 @@ def carparks_availability(carparks, schema):
 # returns a list of nearby carparks with each element as the complete data for each carpark, plus distance
 def nearby_carparks(data, center_location, radius, schema):
     result = []
-    for carpark in data:
+    for i, carpark in enumerate(data):
         distance = vincenty(center_location, carpark[schema["location"]]).m
         if distance <= radius:
             result.append(carpark)
             result[-1][schema["distance"]] = distance
+            result[-1][schema["index"]] = i
     return result
 
 

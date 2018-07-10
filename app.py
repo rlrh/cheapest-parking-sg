@@ -56,7 +56,7 @@ def index():
         search_params = {"start": from_datetime.strftime("%a, %-d %B %Y, %-I:%M %p"), "end": to_datetime.strftime("%a, %-d %B %Y, %-I:%M %p"), "center": center_loc, "radius": radius, "place":request.form["place"]}
 
         if not messages:
-            return render_template("results.html", search_params=search_params, results=cheapest_carparks, markers=markers, schema=schema)
+            return render_template("results.html", search_params=search_params, results=cheapest_carparks, schema=schema)
         else:
             return render_template("apology.html", messages=messages)
         """

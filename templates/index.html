@@ -8,34 +8,34 @@
         <form action="{{ url_for('index') }}" method="post">
                 <div class="row mt-3">
                     <div class="col">
-                        <h2>Find cheapest carparks</h2>
+                        <h3>Find cheapest carparks</h3>
                     </div>
                 </div>
                 <div class="row mt-3">
                     <div class="col-lg-6">
                         <div class="row mt-3">
-                            <label for="start" class="col-sm-4 lead">From</label>
-                            <div class="col-sm-8">
+                            <label for="start" class="col-2 lead">From</label>
+                            <div class="col-10">
                                 <input id="start" name="start" class="flatpickr flatpickr-input form-control" placeholder="Select start date and time.."
                                     type="text" readonly="readonly">
                             </div>
                         </div>
                         <div class="row mt-3">
-                            <label for="end" class="col-sm-4 lead">To</label>
-                            <div class="col-sm-8">
+                            <label for="end" class="col-2 lead">To</label>
+                            <div class="col-10">
                                 <input id="end" name="end" class="flatpickr flatpickr-input form-control" placeholder="Select end date and time.." type="text"
                                     readonly="readonly">
                             </div>
                         </div>
                         <div class="row mt-3">
-                            <label for="center" class="col-sm-4 lead">At a place</label>
-                            <div class="col-sm-8">
+                            <label for="center" class="col-2 lead">At</label>
+                            <div class="col-10">
                                 <input class="form-control" type="text" placeholder="Type a place or address" id="place" name="place">
                             </div>
                         </div>
-                        <div class="row mt-3">
-                            <label for="lat" class="col-sm-4 lead">Or coordinates</label>
-                            <div class="col-sm-8">
+                        <div class="row mt-3 d-none">
+                            <label for="lat" class="col-2 lead">Or</label>
+                            <div class="col-10">
                                 <div class="row">
                                     <div class="col input-group">
                                         <input class="form-control" type="text" placeholder="latitude" id="lat" name="lat">
@@ -45,8 +45,8 @@
                             </div>
                         </div>
                         <div class="row mt-3">
-                            <label for="radius" class="col-sm-4 lead">Within</label>
-                            <div class="col-sm-8">
+                            <label for="radius" class="col-2 lead">Within</label>
+                            <div class="col-10">
                                 <div class="row">
                                     <div class="col input-group">
                                         <input class="form-control" type="number" min="0" value="0" list="common_radii" id="radius" name="radius" />
@@ -64,18 +64,19 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row my-3">
+                            <div class="col text-center">
+                                <input type="submit" class="btn btn-success btn-block" value="Search">
+                            </div>
+                        </div>
                     </div>
                     <div class="col lg-6">
-                        <div class="map-container mt-3">
+                        <div class="map-container my-3">
                             <div id="map"></div>
                         </div>
                     </div>
                 </div>
-                <div class="row my-3">
-                    <div class="col text-center">
-                        <input type="submit" class="btn btn-success btn-lg btn-block" value="Search">
-                    </div>
-                </div>
+
             </form>
             <script>
                 // datetime pickers
