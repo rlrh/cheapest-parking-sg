@@ -19,16 +19,16 @@
                     <div class="col-lg-6">
                         <div class="row mt-3">
                             <label for="start" class="col-2 lead">From</label>
-                            <div class="col-10">
+                            <div class="col-10" data-toggle="tooltip" data-placement="top" title="Start date & time">
                                 <input id="start" name="start" class="flatpickr flatpickr-input form-control" placeholder="Select start date and time.."
-                                    type="text" readonly="readonly">
+                                    type="text" readonly="readonly" data-toggle="tooltip" data-placement="top" title="Start date & time">
                             </div>
                         </div>
                         <div class="row mt-3">
                             <label for="end" class="col-2 lead">To</label>
-                            <div class="col-10">
+                            <div class="col-10" data-toggle="tooltip" data-placement="top" title="End date & time">
                                 <input id="end" name="end" class="flatpickr flatpickr-input form-control" placeholder="Select end date and time.." type="text"
-                                    readonly="readonly">
+                                    readonly="readonly" data-toggle="tooltip" data-placement="top" title="End date & time">
                             </div>
                         </div>
                         {% if name is defined %}
@@ -38,7 +38,7 @@
                         {% endif %}
                             <label for="center" class="col-2 lead">At</label>
                             <div class="col-10">
-                                <input class="form-control" type="text" placeholder="Type a place or address" id="place" name="place">
+                                <input class="form-control" type="text" placeholder="Type a place or address" id="place" name="place" data-toggle="tooltip" data-placement="top" title="Autocomplete search box">
                             </div>
                         </div>
                         <div class="row mt-3 d-none">
@@ -61,7 +61,7 @@
                             <div class="col-10">
                                 <div class="row">
                                     <div class="col input-group">
-                                        <input class="form-control" type="number" min="0" value="0" list="common_radii" id="radius" name="radius" />
+                                        <input class="form-control" type="number" min="0" max="5000" value="500" list="common_radii" id="radius" name="radius" data-toggle="tooltip" data-placement="top" title="Search radius" />
                                         <datalist id="common_radii">
                                             <option value="0">
                                             <option value="200">
@@ -87,7 +87,7 @@
                         </div>
                     </div>
                     <div class="col lg-6">
-                        <div class="map-container my-3">
+                        <div class="map-container mt-3" data-toggle="tooltip" data-placement="top" title="Interactive preview - drag marker to change centre">
                             <div id="map"></div>
                         </div>
                     </div>
@@ -98,6 +98,10 @@
                 {% if center is defined %}
                      // console.log({{ center }});
                 {% endif %}
+
+                $(function () {
+                  $('[data-toggle="tooltip"]').tooltip()
+                })
 
                 // datetime pickers
                 var time_diff = 120;
@@ -163,7 +167,7 @@
                                 label: "P"
                             });
                         });
-                        var markerCluster = new MarkerClusterer(mapContext, markers, {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+                        var markerCluster = new MarkerClusterer(mapContext, markers, {maxZoom: 14, imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
                     }
                 });
             </script>

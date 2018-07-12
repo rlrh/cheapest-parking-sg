@@ -25,6 +25,9 @@ def carpark_charges(carpark, start_datetime, end_datetime, schema):
     curr_datetime = start_datetime
     while curr_datetime < end_datetime:
 
+        if curr_datetime >= end_datetime:
+            return result
+
         start_day = curr_datetime.weekday()
         start_time = curr_datetime.time().isoformat()
         end_day = curr_datetime.weekday()
@@ -50,6 +53,10 @@ def carpark_charges(carpark, start_datetime, end_datetime, schema):
 
         #calculate cost in current rate interval, stoppping if end date is reached.
         for charge in charges:
+
+            if curr_datetime >= end_datetime:
+                return result
+
             cents, per_duration, for_duration = charge.values()
 
             if for_duration != 0: # initial charges
@@ -105,6 +112,7 @@ def cheapest_carparks_within_radius(data, center_location, radius, start_datetim
     available_lots = carparks_availability(valid_data, schema)
     for carpark in valid_data:
         carpark[schema["price"]] = carpark_charges(carpark, start_datetime, end_datetime, schema)
+
         if carpark[schema["carpark_id"]] in available_lots:
             carpark[schema["lots"]] = available_lots[carpark[schema["carpark_id"]]]
         else:

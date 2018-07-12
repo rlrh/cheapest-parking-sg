@@ -30,20 +30,24 @@
         </div>
         {% endif %}
     </div>
-    <div class="row mt-3">
+    <div class="row mt-4">
         <div class="col-lg-8">
-            <div class="map-container mt-3">
+            <div class="map-container">
                 <div id="map"></div>
             </div>
             <div class="row my-3">
                 <span class="col text-muted"><small>Press marker to quick jump to details.</small></span>
             </div>
         </div>
-        <div class="col-lg-4">
+        <div class="col-lg-4" >
+        <div class="result-container">
+        <div id="results">
         {% for result in results %}
-            <div class="col mt-3" id="card{{ loop.index }}">
-                {% if loop.index == 1 %}
+            <div class="col mb-3" id="card{{ loop.index }}">
+                {% if loop.index == 1 and result[schema['price']] != -1 %}
                 <div class="card border-success">
+                {% elif result[schema['price']] == -1 %}
+                <div class="card border-danger">
                 {% else %}
                 <div class="card">
                 {% endif %}
@@ -56,8 +60,12 @@
                     </div>
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between">
-                            <span class="text-muted">Price</span>
-                            <span>${{ '%0.2f'| format(result[schema["price"]]/100) }}</span>
+                            {% if result[schema["price"]] != -1 %}
+                                <span class="text-muted">Price</span>
+                                <span>${{ '%0.2f'| format(result[schema["price"]]/100) }}</span>
+                            {% else %}
+                                <span class="text-danger" >Closed</span>
+                            {% endif %}
                         </li>
                         <li class="list-group-item d-flex justify-content-between">
                             <span class="text-muted">Distance</span>
@@ -76,6 +84,8 @@
             </div>
         {% endfor %}
         </div>
+        </div>
+        </div>
     </div>
     <script>
         // Initialize and add the map
@@ -85,13 +95,15 @@
         var map = new google.maps.Map(document.getElementById('map'), {zoom: 15, center: center});
 
         {% for result in results %}
-            var info = "${{ '%0.2f'| format(result[schema["price"]]/100) }} {{ '%0.0f'| format(result[schema["distance"]]) }}m";
+            var info = "{% if result[schema['price']] == -1 %}Closed{% else %}${{ '%0.2f'| format(result[schema['price']]/100) }}{% endif %} {{ '%0.0f'| format(result[schema['distance']]) }}m";
             //console.log(info);
-            if ({{loop.index}} == 1) {
+            {% if loop.index == 1 and result[schema['price']] != -1 %}
                 var style = "shadow p-1 mb-1 bg-success text-light rounded";
-            } else {
+            {% elif result[schema['price']] == -1 %}
+                var style = "shadow p-1 mb-1 bg-danger text-light rounded";
+            {% else %}
                 var style = "shadow p-1 mb-1 bg-primary text-light rounded"
-            }
+            {% endif %}
             var marker = new MarkerWithLabel({
                 position: {lat: {{ result[schema["location"]][0] }}, lng: {{ result[schema["location"]][1]}} },
                 label: String({{loop.index}}),

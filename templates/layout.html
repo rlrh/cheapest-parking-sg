@@ -57,7 +57,28 @@
             .map-container:before {
                 padding-top: 56.25%;
             }
+
+            .result-container {
+                position: relative;
+                overflow-y: auto;
+            }
+
+            .result-container:before {
+                display: block;
+                content: '';
+                padding-top: 125%;
+            }
+             #results {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                right: 0;
+                left: 0;
+                /* only for testing */
+            }
         }
+
+
     </style>
 
 </head>
@@ -88,14 +109,14 @@
             </div>
         </div>
     </nav>
-    <div class="container">
-        <main>
+    <main>
+        <div class="container">
             {% block main %}{% endblock %}
-        </main>
-    </div>
+        </div>
+    </main>
     <footer>
-        <div class="container d-flex justify-content-between">
-            <p class="row text-muted"><small>2018 Carparks SG. Information in this website is for general information purposes only.</small></p>
+        <div class="container">
+            <p class="row col mt-3 text-muted"><small>2018 Carparks SG. <a href="{{ url_for('terms') }}">Terms of Use</a></small></p>
         </div>
     </footer>
 

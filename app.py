@@ -5,7 +5,7 @@ from datetime import date, time, datetime, timedelta
 from geopy.distance import vincenty
 from helpers import *
 
-data_file = "data-test.json"
+data_file = "data-minified-11072018.json"
 data_schema_file = "data-schema.json"
 
 app = Flask(__name__)
@@ -74,3 +74,7 @@ def index():
 def browse():
     carpark_id = int(request.args.get('id', -1))
     return render_template("browse.html", data=data, schema=schema, id=carpark_id)
+
+@app.route('/terms')
+def terms():
+    return render_template("terms.html")
