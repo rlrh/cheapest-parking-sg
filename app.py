@@ -1,6 +1,6 @@
 import json
 import requests
-from flask import Flask, flash, redirect, render_template, request, session, url_for
+from flask import Flask, flash, redirect, render_template, request, session, url_for, jsonify, abort
 from datetime import date, time, datetime, timedelta
 from geopy.distance import vincenty
 from helpers import *
@@ -73,8 +73,73 @@ def index():
 @app.route('/browse')
 def browse():
     carpark_id = int(request.args.get('id', -1))
-    return render_template("browse.html", data=data, schema=schema, id=carpark_id)
+    return render_template("browse.html", data=add_carparks_availability(data, schema), schema=schema, id=carpark_id)
 
 @app.route('/terms')
 def terms():
     return render_template("terms.html")
+
+@app.route('/api/all')
+def api_all():
+    try:
+        return jsonify(add_carparks_availability(data, schema))
+    except:
+        return abort(400)
+
+@app.route('/api/single')
+def api_single():
+    messages = []
+    try:
+        from_datetime = datetime.strptime(request.args["start"], "%Y-%m-%dT%H:%M")
+    except Exception as e:
+        messages.append("Start datetime invalid. " + str(e))
+    try:
+        to_datetime = datetime.strptime(request.args["end"], "%Y-%m-%dT%H:%M")
+    except Exception as e:
+        messages.append("End datetime invalid. " + str(e))
+    try:
+        carpark_id = int(request.args["id"])
+    except Exception as e:
+        messages.append("Carpark ID invalid. " + str(e))
+    try:
+        charges = carpark_charges(data[carpark_id], from_datetime, to_datetime, schema)
+    except Exception as e:
+        messages.append("Error occurred. " + str(e))
+    if messages:
+        return abort(400)
+    else:
+        return jsonify(charges)
+
+@app.route('/api/multiple')
+def api_multiple():
+    messages = []
+    try:
+        from_datetime = datetime.strptime(request.args["start"], "%Y-%m-%dT%H:%M")
+    except Exception as e:
+        messages.append("Start datetime invalid. " + str(e))
+    try:
+        to_datetime = datetime.strptime(request.args["end"], "%Y-%m-%dT%H:%M")
+    except Exception as e:
+        messages.append("End datetime invalid. " + str(e))
+        messages.append(str(e))
+    try:
+        lat = float(request.args["lat"])
+        lng = float(request.args["lng"])
+        center_loc = [lat, lng]
+    except Exception as e:
+        messages.append("lat and lng invalid. " + str(e))
+    try:
+        radius = int(request.args["radius"])
+    except Exception as e:
+        messages.append("Radius invalid. " + str(e))
+    try:
+        cheapest_carparks = cheapest_carparks_within_radius(data, center_loc, radius, from_datetime, to_datetime, schema)
+        sort_carparks(cheapest_carparks, schema)
+    except Exception as e:
+        messages.append("Error ocurred while searching for carparks. " + str(e))
+
+    if not messages:
+        return jsonify(cheapest_carparks)
+    else:
+        abort(400)
+        # return jsonify(messages)

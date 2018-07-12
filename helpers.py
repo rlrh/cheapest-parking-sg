@@ -126,3 +126,15 @@ def sort_carparks(data, schema, price_first=True):
     else:
         data.sort(key = lambda carpark: carpark[schema["price"]])
         data.sort(key = lambda carpark: carpark[schema["distance"]])
+
+def add_carparks_availability(data, schema):
+    available_lots = carparks_availability(data, schema)
+    for carpark in data:
+        try:
+            if carpark[schema["carpark_id"]] in available_lots:
+                carpark[schema["lots"]] = available_lots[carpark[schema["carpark_id"]]]
+            else:
+                carpark[schema["lots"]] = "Unknown at this time"
+        except:
+            carpark[schema["lots"]] = "Unknown"
+    return data
