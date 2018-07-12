@@ -18,7 +18,6 @@ def str_to_time(string):
 def carpark_charges(carpark, start_datetime, end_datetime, schema):
 
     result = 0
-    curr_rate_end_datetime = 0
 
     carpark_rates = carpark[schema["rates"]]
 
@@ -29,22 +28,20 @@ def carpark_charges(carpark, start_datetime, end_datetime, schema):
         if curr_datetime >= end_datetime:
             return result
 
+        has_rate = False
         curr_rate = 0
+        curr_rate_end_datetime = 0
 
         start_day = curr_datetime.weekday()
-        #start_time = curr_datetime.time().isoformat()
-        #end_day = end_datetime.weekday()
-        #end_time = end_datetime.time().isoformat()
-
         # find matching rate
         for rate in carpark_rates:
-            # Run through all days conatined in rate
+            # Run through all days contained in rate
             for i, day in enumerate(rate[schema["start_days"]]):
                 rate_start_datetime = datetime.combine(curr_datetime.date() + timedelta(days=(day - start_day)), str_to_time(rate[schema["start_time"]]))
                 rate_end_datetime = datetime.combine(curr_datetime.date() + timedelta(days=(rate[schema["end_days"]][i] - start_day)), str_to_time(rate[schema["end_time"]]))
                 if rate_start_datetime <= curr_datetime < rate_end_datetime:
+                    has_rate = True
                     curr_rate = rate
-                    #curr_day_idx = i
                     curr_rate_end_datetime = rate_end_datetime
                     break
             else:
@@ -52,33 +49,32 @@ def carpark_charges(carpark, start_datetime, end_datetime, schema):
             break
 
         # Proceed if there is a matching rate
-        try:
-            charges = curr_rate[schema["rate"]]
-        except:
+        if not has_rate:
             return -1
+        else:
+            #calculate cost in current rate interval, stoppping if end datetime is reached.
+            charges = curr_rate[schema["rate"]]
+            for charge in charges:
 
-        #calculate cost in current rate interval, stoppping if end date is reached.
-        for charge in charges:
+                if curr_datetime >= end_datetime:
+                    return result
 
-            if curr_datetime >= end_datetime:
-                return result
+                cents, per_duration, for_duration = charge.values()
 
-            cents, per_duration, for_duration = charge.values()
+                if for_duration != 0: # initial charges
+                    charge_end_datetime = min(curr_rate_end_datetime, curr_datetime + timedelta(minutes=for_duration))
+                else: # subsequent charges
+                    charge_end_datetime = curr_rate_end_datetime
 
-            if for_duration != 0: # initial charges
-                charge_end_datetime = min(curr_rate_end_datetime, curr_datetime + timedelta(minutes=for_duration))
-            else: # subsequent charges
-                charge_end_datetime = curr_rate_end_datetime
-
-            if per_duration == 0: # per entry
-                result += cents
-                curr_datetime = charge_end_datetime
-            else: # not per entry
-                while curr_datetime < charge_end_datetime:
-                    if curr_datetime >= end_datetime:
-                        return result
+                if per_duration == 0: # per entry
                     result += cents
-                    curr_datetime = min(curr_datetime + timedelta(minutes=per_duration), charge_end_datetime)
+                    curr_datetime = charge_end_datetime
+                else: # not per entry
+                    while curr_datetime < charge_end_datetime:
+                        if curr_datetime >= end_datetime:
+                            return result
+                        result += cents
+                        curr_datetime = min(curr_datetime + timedelta(minutes=per_duration), charge_end_datetime)
     return result
 
 # returns raw data from LTA DataMall
