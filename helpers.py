@@ -18,6 +18,7 @@ def str_to_time(string):
 def carpark_charges(carpark, start_datetime, end_datetime, schema):
 
     result = 0
+    curr_rate_end_datetime = 0
 
     carpark_rates = carpark[schema["rates"]]
 
@@ -28,10 +29,12 @@ def carpark_charges(carpark, start_datetime, end_datetime, schema):
         if curr_datetime >= end_datetime:
             return result
 
+        curr_rate = 0
+
         start_day = curr_datetime.weekday()
-        start_time = curr_datetime.time().isoformat()
-        end_day = curr_datetime.weekday()
-        end_time = curr_datetime.time().isoformat()
+        #start_time = curr_datetime.time().isoformat()
+        #end_day = end_datetime.weekday()
+        #end_time = end_datetime.time().isoformat()
 
         # find matching rate
         for rate in carpark_rates:
@@ -41,9 +44,12 @@ def carpark_charges(carpark, start_datetime, end_datetime, schema):
                 rate_end_datetime = datetime.combine(curr_datetime.date() + timedelta(days=(rate[schema["end_days"]][i] - start_day)), str_to_time(rate[schema["end_time"]]))
                 if rate_start_datetime <= curr_datetime < rate_end_datetime:
                     curr_rate = rate
-                    curr_day_idx = i
+                    #curr_day_idx = i
                     curr_rate_end_datetime = rate_end_datetime
                     break
+            else:
+                continue
+            break
 
         # Proceed if there is a matching rate
         try:
@@ -113,13 +119,13 @@ def cheapest_carparks_within_radius(data, center_location, radius, start_datetim
     for carpark in valid_data:
         carpark[schema["price"]] = carpark_charges(carpark, start_datetime, end_datetime, schema)
 
-        try:
-            if carpark[schema["carpark_id"]] in available_lots:
-                carpark[schema["lots"]] = available_lots[carpark[schema["carpark_id"]]]
-            else:
-                carpark[schema["lots"]] = -1
-        except:
+        #try:
+        if carpark[schema["carpark_id"]] in available_lots:
+            carpark[schema["lots"]] = available_lots[carpark[schema["carpark_id"]]]
+        else:
             carpark[schema["lots"]] = -1
+        #except:
+        #    carpark[schema["lots"]] = -1
     return valid_data
 
 def sort_carparks(data, schema, price_first=True):
@@ -133,11 +139,11 @@ def sort_carparks(data, schema, price_first=True):
 def add_carparks_availability(data, schema):
     available_lots = carparks_availability(data, schema)
     for carpark in data:
-        try:
-            if carpark[schema["carpark_id"]] in available_lots:
-                carpark[schema["lots"]] = available_lots[carpark[schema["carpark_id"]]]
-            else:
-                carpark[schema["lots"]] = -1
-        except:
+        #try:
+        if carpark[schema["carpark_id"]] in available_lots:
+            carpark[schema["lots"]] = available_lots[carpark[schema["carpark_id"]]]
+        else:
             carpark[schema["lots"]] = -1
+        #except:
+        #    carpark[schema["lots"]] = -1
     return data
