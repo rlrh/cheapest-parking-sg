@@ -41,13 +41,13 @@
         }
         @media (min-width: 768px) {
             div.infowindow {
-                max-height: 320px;
+                max-height: 270px;
                 overflow-y:auto;
             }
         }
         @media (min-width: 992px) {
             div.infowindow {
-                max-height: 480px;
+                max-height: 360px;
                 overflow-y:auto;
                 font-family: "Nunito Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
                 font-size: 0.75rem;
@@ -151,6 +151,10 @@
                     + String(carpark[schema.address])
                     + "</h6>";
 
+                if (carpark[schema.lots] != -1) {
+                    contentString += "<p class='text-success'>" + carpark[schema.lots] + " lots now</p>";
+                }
+
                 carpark[schema.human_rates].forEach(function (rate) {
                     temp =
                         "<strong class='text-primary'>" + rate[schema.human_interval] + "</strong>"
@@ -191,7 +195,7 @@
                 });
                 markers.push(marker);
             });
-            var markerCluster = new MarkerClusterer(map, markers, {maxZoom: 14, imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+            var markerCluster = new MarkerClusterer(map, markers, {maxZoom: 14, imagePath: 'https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclustererplus/images/m'});
 
             {% if id != -1 %}
                 new google.maps.event.trigger(markers[{{ id }}], 'click' );

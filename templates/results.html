@@ -56,7 +56,7 @@
                             <h5 class="card-title">{{ result[schema["name"]] }}</h5>
                             <h6 class="card-subtitle mb-2 text-muted">{{ result[schema["address"]] }}</h6>
                         </div>
-                        <h1 class="class="display-1 text-muted"">{{ loop.index }}</h1>
+                        <h1 class="text-muted">{{ loop.index }}</h1>
                     </div>
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between">
@@ -71,11 +71,13 @@
                             <span class="text-muted">Distance</span>
                             <span>{{ '%0.0f'| format(result[schema["distance"]]) }} m</span>
                         </li>
+                        {% if result[schema["lots"]] != -1 %}
                         <li class="list-group-item d-flex justify-content-between">
                             <span class="text-muted">Lots</span>
                             <span class="text-success">{{ result[schema["lots"]] }}</span>
                         </li>
-                        <li class="list-group-item d-flex justify-content-start">
+                        {% endif %}
+                        <li class="list-group-item d-flex justify-content-between">
                             <a href="{{ url_for('browse', id=result[schema['index']]) }}" class="card-link text-info">More Info</a>
                             <a href="https://www.google.com/maps/dir/?api=1&destination={{result[schema['location']][0]}},{{result[schema['location']][1]}}&travelmode=driving" class="card-link text-info">Get Directions</a>
                         </li>

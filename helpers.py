@@ -113,10 +113,13 @@ def cheapest_carparks_within_radius(data, center_location, radius, start_datetim
     for carpark in valid_data:
         carpark[schema["price"]] = carpark_charges(carpark, start_datetime, end_datetime, schema)
 
-        if carpark[schema["carpark_id"]] in available_lots:
-            carpark[schema["lots"]] = available_lots[carpark[schema["carpark_id"]]]
-        else:
-            carpark[schema["lots"]] = "Unknown"
+        try:
+            if carpark[schema["carpark_id"]] in available_lots:
+                carpark[schema["lots"]] = available_lots[carpark[schema["carpark_id"]]]
+            else:
+                carpark[schema["lots"]] = -1
+        except:
+            carpark[schema["lots"]] = -1
     return valid_data
 
 def sort_carparks(data, schema, price_first=True):
@@ -134,7 +137,7 @@ def add_carparks_availability(data, schema):
             if carpark[schema["carpark_id"]] in available_lots:
                 carpark[schema["lots"]] = available_lots[carpark[schema["carpark_id"]]]
             else:
-                carpark[schema["lots"]] = "Unknown at this time"
+                carpark[schema["lots"]] = -1
         except:
-            carpark[schema["lots"]] = "Unknown"
+            carpark[schema["lots"]] = -1
     return data
