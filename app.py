@@ -52,7 +52,7 @@ def index():
             messages.append("Error ocurred while searching for carparks")
             messages.append(str(e))
 
-        markers = list(map(lambda carpark: carpark[schema["location"]], cheapest_carparks))
+        #markers = list(map(lambda carpark: carpark[schema["location"]], cheapest_carparks))
 
         search_params = {"start": from_datetime.strftime("%a, %-d %B %Y, %-I:%M %p"), "end": to_datetime.strftime("%a, %-d %B %Y, %-I:%M %p"), "center": center_loc, "radius": radius, "place":request.form["place"]}
 
@@ -143,3 +143,57 @@ def api_multiple():
     else:
         abort(400)
         # return jsonify(messages)
+
+@app.route('/fuzzy', methods=["GET", "POST"])
+def fuzzy():
+    if request.method == "POST":
+        messages = []
+        try:
+            from_datetime = datetime.strptime(request.form["start"], "%Y-%m-%dT%H:%M")
+        except Exception as e:
+            messages.append("Start datetime invalid.")
+            messages.append(str(e))
+        try:
+            start_hr = int(request.form["start_hr"])
+            end_hr = int(request.form["end_hr"])
+            if end_hr < start_hr:
+                raise Exception
+        except Exception as e:
+            messages.append("Start and/or end hour invalid.")
+            messages.append(str(e))
+        try:
+            lat = float(request.form["lat"])
+            lng = float(request.form["lng"])
+            center_loc = [lat, lng]
+        except Exception as e:
+            messages.append("Center location invalid.")
+            messages.append(str(e))
+        try:
+            radius = int(request.form["radius"])
+        except Exception as e:
+            messages.append("Radius invalid.")
+            messages.append(str(e))
+        try:
+            cheapest_carparks2 = cheapest_carparks_for_durations(data, center_loc, radius, from_datetime, start_hr, end_hr, schema)
+        except Exception as e:
+            messages.append("Error ocurred while searching for carparks.")
+            messages.append(str(e))
+
+        markers = {}
+        for i, carpark in enumerate(cheapest_carparks2):
+            if tuple(carpark[schema["location"]]) in markers:
+                markers[tuple(carpark[schema["location"]])]["hours"].append(start_hr + i)
+            else:
+                markers[tuple(carpark[schema["location"]])] = {}
+                markers[tuple(carpark[schema["location"]])]["hours"] = [start_hr + i]
+                markers[tuple(carpark[schema["location"]])]["index"] = i + 1
+
+        search_params = {"start": from_datetime.strftime("%a, %-d %B %Y, %-I:%M %p"), "start_hr": start_hr, "end_hr": end_hr, "center": center_loc, "radius": radius, "place":request.form["place"]}
+
+        if not messages:
+            return render_template("fuzzy_results.html", search_params=search_params, markers=markers, results=cheapest_carparks2, schema=schema)
+        else:
+            return render_template("apology.html", messages=messages)
+    else:
+        markers = list(map(lambda carpark: carpark[schema["location"]], data))
+        return render_template("fuzzy.html", markers=markers, schema=schema)

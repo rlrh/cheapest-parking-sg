@@ -1,10 +1,10 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Results
+    Fuzzy Cheapest Results - cheapest carparks for {{ search_params["start_hr"] }} to {{ search_params["end_hr"] }} hours
 {% endblock %}
 
-{% block style %}
+ {% block style %}
     <style>
         /* Always set the map height explicitly to define the size of the div
             * element that contains the map. */
@@ -52,19 +52,17 @@
                 /* only for testing */
             }
         }
-
-
     </style>
-    {% endblock %}
+{% endblock %}
 
 {% block navitems %}
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('index') }}">Find Cheapest</a>
+    </li>
     <li class="nav-item active">
-        <a class="nav-link" href="{{ url_for('index') }}">Find Cheapest
+        <a class="nav-link" href="{{ url_for('fuzzy') }}">Fuzzy Cheapest
             <span class="sr-only">(current)</span>
         </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('fuzzy') }}">Fuzzy Cheapest</a>
     </li>
     <li class="nav-item">
         <a class="nav-link" href="{{ url_for('browse') }}">Browse All</a>
@@ -72,30 +70,19 @@
 {% endblock %}
 
 {% block main %}
-    {% if results|length > 1 %}
-    <div class="row mt-3">
-        <div class="col">
-            <h3>{{ results|length }} Results</h3>
-        </div>
-    </div>
-    <div class="form-row justify-content-start">
-    {% else %}
     <div class="form-row mt-3 justify-content-start">
-    {% endif %}
         <div class="col-auto mt-2">
             <span class="lead text-justify">From <span class="p-1 rounded border bg-light">{{ search_params["start"] }}</span> </span>
         </div>
-        <div class="col-auto mt-2">
-            <span class="lead text-justify">to <span class="p-1 rounded border bg-light">{{ search_params["end"] }}</span> </span>
+        <div class="col-auto mt-2 d-none d-sm-block">
+            <span class="lead text-justify">for <span class="p-1 rounded border bg-light">{{ search_params["start_hr"] }} to {{ search_params["end_hr"] }} hours</span></span>
         </div>
-        {% if results|length > 1 %}
         <div class="col-auto mt-2 d-none d-sm-block">
             <span class="lead text-justify">within <span class="p-1 rounded border bg-light">{{ search_params["radius"] }} m</span> </span>
         </div>
         <div class="col-auto mt-2 d-none d-sm-block">
             <span class="lead text-justify">of <span class="p-1 rounded border bg-light">{{ search_params["place"] }}</span></span>
         </div>
-        {% endif %}
     </div>
     <div class="row mt-4">
         <div class="col-lg-8">
@@ -111,9 +98,7 @@
         <div id="results">
         {% for result in results %}
             <div class="col mb-3" id="card{{ loop.index }}">
-                {% if loop.index == 1 and result[schema['price']] != -1 %}
-                <div class="card border-success">
-                {% elif result[schema['price']] == -1 %}
+                {% if result[schema['price']] == -1 %}
                 <div class="card border-danger">
                 {% else %}
                 <div class="card">
@@ -123,7 +108,8 @@
                             <h5 class="card-title">{{ result[schema["name"]] }}</h5>
                             <h6 class="card-subtitle mb-2 text-muted">{{ result[schema["address"]] }}</h6>
                         </div>
-                        <h1 class="text-muted">{{ loop.index }}</h1>
+                        <h1 class="text-muted">{{ search_params["start_hr"] + loop.index - 1 }}</h1>
+                        <span> hr</span>
                     </div>
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between">
@@ -162,37 +148,28 @@
         var center = {lat: {{ search_params["center"][0] }}, lng: {{ search_params["center"][1] }}};
         // The map, centered
         var map = new google.maps.Map(document.getElementById('map'), {zoom: 15, center: center});
-
-        {% for result in results %}
-            var info = "{% if result[schema['price']] == -1 %}Closed{% else %}${{ '%0.2f'| format(result[schema['price']]/100) }}{% endif %} {{ '%0.0f'| format(result[schema['distance']]) }}m";
-            //console.log(info);
-            {% if loop.index == 1 and result[schema['price']] != -1 %}
-                var style = "shadow p-1 mb-1 bg-success text-light rounded";
-            {% elif result[schema['price']] == -1 %}
-                var style = "shadow p-1 mb-1 bg-danger text-light rounded";
-            {% else %}
-                var style = "shadow p-1 mb-1 bg-primary text-light rounded"
-            {% endif %}
+        // The marker, positioned at center
+        var marker = new google.maps.Marker({position: center, map: map});
+        // markers structure [{location: {hours:<list>, index:<int>}]
+        {% for marker in markers %}
+            var info = {{ markers[marker]["hours"] }}.toString() + "hr";
+            var style = "shadow p-1 mb-1 bg-primary text-light rounded"
             var marker = new MarkerWithLabel({
-                position: {lat: {{ result[schema["location"]][0] }}, lng: {{ result[schema["location"]][1]}} },
-                label: String({{loop.index}}),
+                position: {lat: {{ marker[0] }}, lng: {{ marker[1]}} },
+                label: "P",
                 animation: google.maps.Animation.DROP,
                 map: map,
                 labelContent: info,
-                labelAnchor: new google.maps.Point(22, 0),
+                labelAnchor: new google.maps.Point(15, 0),
                 labelClass: style, // the CSS class for the label
                 labelStyle: {opacity: 1.0}
             });
 
             marker.addListener('click', function() {
-                var element = document.getElementById("card{{ loop.index }}");
+                var element = document.getElementById("card{{ markers[marker]['index'] }}");
                 element.scrollIntoView({behavior: "smooth"});
             });
         {% endfor %}
-
-        // The marker, positioned at center
-        var marker = new google.maps.Marker({position: center, map: map});
-
     </script>
 
 {% endblock %}

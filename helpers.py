@@ -2,6 +2,7 @@ import json
 import requests
 from datetime import date, time, datetime, timedelta
 from geopy.distance import vincenty
+from copy import deepcopy
 
 def str_to_time(string):
     split = list(map(lambda number: int(number), string.split(":")))
@@ -124,12 +125,17 @@ def cheapest_carparks_within_radius(data, center_location, radius, start_datetim
         #    carpark[schema["lots"]] = -1
     return valid_data
 
+# warning - sorts in place
 def sort_carparks(data, schema, price_first=True):
     if price_first == True:
         data.sort(key = lambda carpark: carpark[schema["distance"]])
         data.sort(key = lambda carpark: carpark[schema["price"]])
+        while data[0][schema["price"]] == -1:
+            data.append(data.pop(0))
     else:
         data.sort(key = lambda carpark: carpark[schema["price"]])
+        while data[0][schema["price"]] == -1:
+            data.append(data.pop(0))
         data.sort(key = lambda carpark: carpark[schema["distance"]])
 
 def add_carparks_availability(data, schema):
@@ -143,3 +149,32 @@ def add_carparks_availability(data, schema):
         #except:
         #    carpark[schema["lots"]] = -1
     return data
+
+def cheapest_carparks_for_durations(data, center_location, radius, start_datetime, start_hr, end_hr, schema):
+
+    results = []
+
+    valid_data = nearby_carparks(data, center_location, radius, schema)
+    if not valid_data:
+        return []
+    available_lots = carparks_availability(valid_data, schema)
+    for carpark in valid_data:
+        try:
+            if carpark[schema["carpark_id"]] in available_lots:
+                carpark[schema["lots"]] = available_lots[carpark[schema["carpark_id"]]]
+            else:
+                carpark[schema["lots"]] = -1
+        except:
+            carpark[schema["lots"]] = -1
+
+    for hours in range(start_hr, end_hr + 1):
+        #print("from:", from_datetime, "to:", start_datetime + timedelta(hours=hours))
+        new_data = deepcopy(valid_data)
+        for carpark in new_data:
+            carpark[schema["price"]] = carpark_charges(carpark, start_datetime, start_datetime + timedelta(hours=hours), schema)
+        new_data.sort(key = lambda carpark: carpark[schema["distance"]])
+        new_data.sort(key = lambda carpark: carpark[schema["price"]])
+        #print("name:", new_data[0][d_name], "price:", new_data[0][d_price])
+        results.append(new_data[0])
+
+    return results

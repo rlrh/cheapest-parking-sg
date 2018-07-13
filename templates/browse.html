@@ -114,6 +114,11 @@
             });
             var markers = [];
             var info = new google.maps.InfoWindow({maxWidth: 320});
+            var place_marker = new google.maps.Marker({
+              map: map,
+              anchorPoint: new google.maps.Point(0, -29),
+              animation: google.maps.Animation.DROP,
+            });
             var autocomplete = new google.maps.places.Autocomplete(document.getElementById('place'));
             autocomplete.setComponentRestrictions({ 'country': 'sg' });
 
@@ -138,6 +143,9 @@
                     map.setCenter(place.geometry.location);
                     map.setZoom(15);  // Why 15? Because it looks good.
                 }
+
+                place_marker.setPosition(place.geometry.location);
+                place_marker.setAnimation(google.maps.Animation.DROP);
             });
 
             function showInfo(marker, carpark, index) {

@@ -1,10 +1,11 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Find Cheapest - calculates parking charges to find cheapest carparks
+    Fuzzy Cheapest - find cheapest carpark for range of durations
 {% endblock %}
+
 {% block style %}
-<style>
+    <style>
         /* Always set the map height explicitly to define the size of the div
             * element that contains the map. */
 
@@ -26,27 +27,25 @@
             left: 0;
             /* only for testing */
         }
-        @media (min-width: 576px) {
+
+        @media (min-width: 768px) {
             .map-container:before {
                 padding-top: 56.25%;
             }
         }
 
-        @media (min-width: 768px) {
-            .map-container:before {
-                padding-top: 75%;
-            }
-        }
-</style>
+
+    </style>
 {% endblock %}
+
 {% block navitems %}
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('index') }}">Find Cheapest</a>
+    </li>
     <li class="nav-item active">
-        <a class="nav-link" href="{{ url_for('index') }}">Find Cheapest
+        <a class="nav-link" href="{{ url_for('fuzzy') }}">Fuzzy Cheapest
             <span class="sr-only">(current)</span>
         </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('fuzzy') }}">Fuzzy Cheapest</a>
     </li>
     <li class="nav-item">
         <a class="nav-link" href="{{ url_for('browse') }}">Browse All</a>
@@ -54,15 +53,11 @@
 {% endblock %}
 
 {% block main %}
-        <form action="{{ url_for('index') }}" method="post">
+        <form action="{{ url_for('fuzzy') }}" method="post">
                 <div class="row mt-3">
                     <div class="col">
-                        {% if name is defined %}
-                            <h3>{{name}} parking charges</h3>
-                        {% else %}
-                            <h3>Find cheapest carparks</h3>
-                        {% endif %}
-                        <p class="d-none d-md-block">We'll calculate parking charges based on these parameters:</p>
+                        <h3>Don't know when you'll leave?</h3>
+                        <p>Find the cheapest carpark for a range of durations.</p>
                     </div>
                 </div>
                 <div class="row">
@@ -75,21 +70,24 @@
                             </div>
                         </div>
                         <div class="row mt-3">
-                            <label for="end" class="col-2 lead">To</label>
-                            <div class="col-10" data-toggle="tooltip" data-placement="top" title="End date & time">
-                                <input id="end" name="end" class="flatpickr flatpickr-input form-control mb-2" placeholder="Select end date and time.." type="text"
-                                    readonly="readonly" data-toggle="tooltip" data-placement="top" title="End date & time">
-                                {% if name is not defined %}
-                                <span>Don't know what time you'll leave?</span></br>
-                                <a class="text-info" href="{{ url_for('fuzzy') }}">Find the cheapest carpark for a range of durations here.</a>
-                                {% endif %}
+                            <label for="start_hr" class="col-2 lead d-block d-sm-none">Hours</label>
+                            <label for="start_hr" class="col-2 lead d-none d-sm-block">For</label>
+                            <div class="col-10">
+                                <div class="row">
+                                    <div class="col input-group">
+                                        <input class="form-control" type="number" min="1" max="8" value="1" placeholder="Minimum" id="start_hr" name="start_hr"  data-toggle="tooltip" data-placement="top" title="Min. hours (1-8)">
+                                        <div class="input-group-append">
+                                            <div class="input-group-text">to</div>
+                                        </div>
+                                        <input class="form-control" type="number" min="1" max="8" value="4" placeholder="Maximum" id="end_hr" name="end_hr"  data-toggle="tooltip" data-placement="top" title="Max. hours (1-8)">
+                                        <div class="input-group-append">
+                                            <div class="input-group-text d-none d-sm-block">hours</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        {% if name is defined %}
-                            <div class="row mt-3 d-none">
-                        {% else %}
-                            <div class="row mt-3">
-                        {% endif %}
+                        <div class="row mt-3">
                             <label for="center" class="col-2 lead">At</label>
                             <div class="col-10">
                                 <input class="form-control" type="text" placeholder="Enter a location" id="place" name="place" data-toggle="tooltip" data-placement="top" title="Enter a location here or drag the map marker">
@@ -106,16 +104,12 @@
                                 </div>
                             </div>
                         </div>
-                        {% if name is defined %}
-                            <div class="row mt-3 d-none">
-                        {% else %}
-                            <div class="row mt-3">
-                        {% endif %}
+                        <div class="row mt-3">
                             <label for="radius" class="col-2 lead">Within</label>
                             <div class="col-10">
                                 <div class="row">
                                     <div class="col input-group">
-                                        <input class="form-control" type="number" min="0" max="5000" value="500" list="common_radii" id="radius" name="radius" data-toggle="tooltip" data-placement="top" title="Search radius (0-5000m)" />
+                                        <input class="form-control" type="number" min="0" max="2000" value="500" list="common_radii" id="radius" name="radius" data-toggle="tooltip" data-placement="top" title="Search radius (0-2000m)" />
                                         <datalist id="common_radii">
                                             <option value="0">
                                             <option value="200">
@@ -132,11 +126,7 @@
                         </div>
                         <div class="row my-3">
                             <div class="col text-center">
-                                {% if name is defined %}
-                                    <input type="submit" class="btn btn-success btn-block" value="Calculate">
-                                {% else %}
-                                    <input type="submit" class="btn btn-success btn-block" value="Search">
-                                {% endif %}
+                                <input type="submit" class="btn btn-success btn-block" value="Search">
                             </div>
                         </div>
                     </div>
@@ -149,10 +139,6 @@
 
             </form>
             <script>
-                {% if center is defined %}
-                     // console.log({{ center }});
-                {% endif %}
-
                 $(function () {
                   $('[data-toggle="tooltip"]').tooltip()
                 })
@@ -167,30 +153,10 @@
                         altFormat: "D, j F Y, h:i K",
                         defaultDate: "today",
                         minDate: "today",
-                        onChange: function (selectedDates, dateStr, instance) {
-                            if (endPicker.selectedDates[0] < selectedDates[0]) {
-                                endPicker.setDate(selectedDates[0], true);
-                            }
-                        }
-                    });
-                var endPicker = flatpickr("#end",
-                    {
-                        enableTime: true,
-                        dateFormat: "Y-m-dTH:i",
-                        altInput: true,
-                        altFormat: "D, j F Y, h:i K",
-                        defaultDate: "today",
-                        minDate: "today",
-                        onChange: function (selectedDates, dateStr, instance) {
-                            if (selectedDates[0] < startPicker.selectedDates[0]) {
-                                startPicker.setDate(selectedDates[0], true);
-                            }
-                        }
                     });
 
                 document.addEventListener('DOMContentLoaded', function () {
                     startPicker.setDate(new Date(), true);
-                    endPicker.setDate(new Date(startPicker.selectedDates[0].getTime() + time_diff*60000), true);
                 }, false);
 
                 var marker_locations = {{ markers }}.map(function(carpark) { return {lat: carpark[0], lng: carpark[1] } })
