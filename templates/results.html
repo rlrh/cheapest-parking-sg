@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Results
+    Cheapest carparks around {{ search_params["place"] }}
 {% endblock %}
 
 {% block style %}
@@ -72,7 +72,9 @@
 {% endblock %}
 
 {% block main %}
+    {#
     {% if results|length > 1 %}
+
     <div class="row mt-3">
         <div class="col">
             <h3>{{ results|length }} Results</h3>
@@ -82,6 +84,8 @@
     {% else %}
     <div class="form-row mt-3 justify-content-start">
     {% endif %}
+    #}
+    <div class="form-row mt-3 justify-content-start">
         <div class="col-auto mt-2">
             <span class="lead text-justify">From <span class="p-1 rounded border bg-light">{{ search_params["start"] }}</span> </span>
         </div>
@@ -118,7 +122,7 @@
                 {% else %}
                 <div class="card">
                 {% endif %}
-                    <div class="card-body d-flex justify-content-between">
+                    <div class="card-body d-flex justify-content-between pb-2">
                         <div>
                             <h5 class="card-title">{{ result[schema["name"]] }}</h5>
                             <h6 class="card-subtitle mb-2 text-muted">{{ result[schema["address"]] }}</h6>
@@ -127,23 +131,25 @@
                     </div>
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between">
-                            {% if result[schema["price"]] != -1 %}
-                                <span class="text-muted">Price</span>
-                                <span>${{ '%0.2f'| format(result[schema["price"]]/100) }}</span>
-                            {% else %}
-                                <span class="text-danger" >Closed</span>
+                            <div class="d-flex flex-column">
+                                {% if result[schema["price"]] != -1 %}
+                                    <span class="text-muted">Price</span>
+                                    <span class="lead">${{ '%0.2f'| format(result[schema["price"]]/100) }}</span>
+                                {% else %}
+                                    <span class="text-danger lead" >Closed</span>
+                                {% endif %}
+                            </div>
+                            <div class="d-flex flex-column">
+                                <span class="text-muted">Distance</span>
+                                <span class="lead">{{ '%0.0f'| format(result[schema["distance"]]) }} m</span>
+                            </div>
+                            {% if result[schema["lots"]] != -1 %}
+                            <div class="d-flex flex-column">
+                                <span class="text-muted">Lots</span>
+                                <span class="text-success lead">{{ result[schema["lots"]] }}</span>
+                            </div>
                             {% endif %}
                         </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span class="text-muted">Distance</span>
-                            <span>{{ '%0.0f'| format(result[schema["distance"]]) }} m</span>
-                        </li>
-                        {% if result[schema["lots"]] != -1 %}
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span class="text-muted">Lots</span>
-                            <span class="text-success">{{ result[schema["lots"]] }}</span>
-                        </li>
-                        {% endif %}
                         <li class="list-group-item d-flex justify-content-between">
                             <a href="{{ url_for('browse', id=result[schema['index']]) }}" class="card-link text-info">More Info</a>
                             <a href="https://www.google.com/maps/dir/?api=1&destination={{result[schema['location']][0]}},{{result[schema['location']][1]}}&travelmode=driving" class="card-link text-info">Get Directions</a>
@@ -152,11 +158,17 @@
                 </div>
             </div>
         {% endfor %}
+            <div class="col mb-3">
+                <span class="text-muted"><small>Price may not include GST.</small></span>
+                <p class="text-muted"><small>Distance as the crow flies.</small></p>
+            </div>
         </div>
         </div>
         </div>
     </div>
     <script>
+    document.addEventListener('DOMContentLoaded', function () {
+
         // Initialize and add the map
         // The location of center
         var center = {lat: {{ search_params["center"][0] }}, lng: {{ search_params["center"][1] }}};
@@ -192,6 +204,9 @@
 
         // The marker, positioned at center
         var marker = new google.maps.Marker({position: center, map: map});
+
+    }, false);
+
 
     </script>
 

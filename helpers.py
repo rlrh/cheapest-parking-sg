@@ -172,8 +172,7 @@ def cheapest_carparks_for_durations(data, center_location, radius, start_datetim
         new_data = deepcopy(valid_data)
         for carpark in new_data:
             carpark[schema["price"]] = carpark_charges(carpark, start_datetime, start_datetime + timedelta(hours=hours), schema)
-        new_data.sort(key = lambda carpark: carpark[schema["distance"]])
-        new_data.sort(key = lambda carpark: carpark[schema["price"]])
+        sort_carparks(new_data, schema, price_first=True)
         #print("name:", new_data[0][d_name], "price:", new_data[0][d_price])
         results.append(new_data[0])
 

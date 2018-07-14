@@ -34,7 +34,7 @@
 
         @media (min-width: 768px) {
             .map-container:before {
-                padding-top: 75%;
+                padding-top: 66%;
             }
         }
 </style>
@@ -55,36 +55,18 @@
 
 {% block main %}
         <form action="{{ url_for('index') }}" method="post">
-                <div class="row mt-3">
+                <div class="row mt-4">
                     <div class="col">
                         {% if name is defined %}
                             <h3>{{name}} parking charges</h3>
                         {% else %}
                             <h3>Find cheapest carparks</h3>
                         {% endif %}
-                        <p class="d-none d-md-block">We'll calculate parking charges based on these parameters:</p>
+                        <p class="d-none d-md-block">We'll calculate parking charges of nearby carparks based on these parameters:</p>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-lg-6">
-                        <div class="row mt-3">
-                            <label for="start" class="col-2 lead">From</label>
-                            <div class="col-10" data-toggle="tooltip" data-placement="top" title="Start date & time">
-                                <input id="start" name="start" class="flatpickr flatpickr-input form-control" placeholder="Select start date and time.."
-                                    type="text" readonly="readonly" data-toggle="tooltip" data-placement="top" title="Start date & time">
-                            </div>
-                        </div>
-                        <div class="row mt-3">
-                            <label for="end" class="col-2 lead">To</label>
-                            <div class="col-10" data-toggle="tooltip" data-placement="top" title="End date & time">
-                                <input id="end" name="end" class="flatpickr flatpickr-input form-control mb-2" placeholder="Select end date and time.." type="text"
-                                    readonly="readonly" data-toggle="tooltip" data-placement="top" title="End date & time">
-                                {% if name is not defined %}
-                                <span>Don't know what time you'll leave?</span></br>
-                                <a class="text-info" href="{{ url_for('fuzzy') }}">Find the cheapest carpark for a range of durations here.</a>
-                                {% endif %}
-                            </div>
-                        </div>
                         {% if name is defined %}
                             <div class="row mt-3 d-none">
                         {% else %}
@@ -92,7 +74,7 @@
                         {% endif %}
                             <label for="center" class="col-2 lead">At</label>
                             <div class="col-10">
-                                <input class="form-control" type="text" placeholder="Enter a location" id="place" name="place" data-toggle="tooltip" data-placement="top" title="Enter a location here or drag the map marker">
+                                <input class="form-control" type="text" placeholder="Search for a place or address" id="place" name="place" data-toggle="tooltip" data-placement="top" title="Search for a place or address here or drag the map marker">
                             </div>
                         </div>
                         <div class="row mt-3 d-none">
@@ -130,12 +112,30 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row mt-3">
+                            <label for="start" class="col-2 lead">From</label>
+                            <div class="col-10" data-toggle="tooltip" data-placement="top" title="Start date & time">
+                                <input id="start" name="start" class="flatpickr flatpickr-input form-control" placeholder="Select start date and time.."
+                                    type="text" readonly="readonly" data-toggle="tooltip" data-placement="top" title="Start date & time">
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <label for="end" class="col-2 lead">To</label>
+                            <div class="col-10" data-toggle="tooltip" data-placement="top" title="End date & time">
+                                <input id="end" name="end" class="flatpickr flatpickr-input form-control mb-2" placeholder="Select end date and time.." type="text"
+                                    readonly="readonly" data-toggle="tooltip" data-placement="top" title="End date & time">
+                                {% if name is not defined %}
+                                <span>Don't know what time you'll leave?</span></br>
+                                <a class="text-info" href="{{ url_for('fuzzy') }}">Find the cheapest carpark for a range of durations here.</a>
+                                {% endif %}
+                            </div>
+                        </div>
                         <div class="row my-3">
                             <div class="col text-center">
                                 {% if name is defined %}
                                     <input type="submit" class="btn btn-success btn-block" value="Calculate">
                                 {% else %}
-                                    <input type="submit" class="btn btn-success btn-block" value="Search">
+                                    <input type="submit" class="btn btn-success btn-block" value="Find Cheapest Carparks">
                                 {% endif %}
                             </div>
                         </div>
@@ -189,7 +189,10 @@
                     });
 
                 document.addEventListener('DOMContentLoaded', function () {
-                    startPicker.setDate(new Date(), true);
+                    var coeff = 1000 * 60 * 5;
+                    var date = new Date();
+                    var rounded_date = new Date(Math.ceil(date.getTime() / coeff) * coeff);
+                    startPicker.setDate(rounded_date , true);
                     endPicker.setDate(new Date(startPicker.selectedDates[0].getTime() + time_diff*60000), true);
                 }, false);
 
@@ -201,7 +204,7 @@
                         location: { latitude: {{ center[0] }}, longitude: {{ center[1] }} },
                         radius: 50,
                     {% else %}
-                        location: { latitude: 1.287953, longitude: 103.851784 },
+                        location: { latitude: 1.286194, longitude: 103.853032 },
                         radius: 500,
                     {% endif %}
                     inputBinding: {
@@ -212,7 +215,7 @@
                     },
                     enableAutocomplete: true,
                     autocompleteOptions: { componentRestrictions: { country: 'sg' } },
-                    addressFormat: 'street_address',
+                    addressFormat: 'point_of_interest', //'street_address',
                     oninitialized: function(component) {
                         var mapContext = $(component).locationpicker('map').map;
                         var markers = marker_locations.map(function(location, i) {

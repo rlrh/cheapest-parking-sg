@@ -63,34 +63,9 @@
                 <div class="row">
                     <div class="col-lg-6">
                         <div class="row mt-3">
-                            <label for="start" class="col-2 lead">From</label>
-                            <div class="col-10" data-toggle="tooltip" data-placement="top" title="Start date & time">
-                                <input id="start" name="start" class="flatpickr flatpickr-input form-control" placeholder="Select start date and time.."
-                                    type="text" readonly="readonly" data-toggle="tooltip" data-placement="top" title="Start date & time">
-                            </div>
-                        </div>
-                        <div class="row mt-3">
-                            <label for="start_hr" class="col-2 lead d-block d-sm-none">Hours</label>
-                            <label for="start_hr" class="col-2 lead d-none d-sm-block">For</label>
-                            <div class="col-10">
-                                <div class="row">
-                                    <div class="col input-group">
-                                        <input class="form-control" type="number" min="1" max="8" value="1" placeholder="Minimum" id="start_hr" name="start_hr"  data-toggle="tooltip" data-placement="top" title="Min. hours (1-8)">
-                                        <div class="input-group-append">
-                                            <div class="input-group-text">to</div>
-                                        </div>
-                                        <input class="form-control" type="number" min="1" max="8" value="4" placeholder="Maximum" id="end_hr" name="end_hr"  data-toggle="tooltip" data-placement="top" title="Max. hours (1-8)">
-                                        <div class="input-group-append">
-                                            <div class="input-group-text d-none d-sm-block">hours</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mt-3">
                             <label for="center" class="col-2 lead">At</label>
                             <div class="col-10">
-                                <input class="form-control" type="text" placeholder="Enter a location" id="place" name="place" data-toggle="tooltip" data-placement="top" title="Enter a location here or drag the map marker">
+                                <input class="form-control" type="text" placeholder="Search for a place or address" id="place" name="place" data-toggle="tooltip" data-placement="top" title="Search for a place or address here or drag the map marker">
                             </div>
                         </div>
                         <div class="row mt-3 d-none">
@@ -119,6 +94,31 @@
                                         </datalist>
                                         <div class="input-group-append">
                                             <div class="input-group-text">metres</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <label for="start" class="col-2 lead">From</label>
+                            <div class="col-10" data-toggle="tooltip" data-placement="top" title="Start date & time">
+                                <input id="start" name="start" class="flatpickr flatpickr-input form-control" placeholder="Select start date and time.."
+                                    type="text" readonly="readonly" data-toggle="tooltip" data-placement="top" title="Start date & time">
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <label for="start_hr" class="col-2 lead d-block d-sm-none">Hours</label>
+                            <label for="start_hr" class="col-2 lead d-none d-sm-block">For</label>
+                            <div class="col-10">
+                                <div class="row">
+                                    <div class="col input-group">
+                                        <input class="form-control" type="number" min="1" max="8" value="1" placeholder="Minimum" id="start_hr" name="start_hr"  data-toggle="tooltip" data-placement="top" title="Min. hours (1-8) here">
+                                        <div class="input-group-append">
+                                            <div class="input-group-text">to</div>
+                                        </div>
+                                        <input class="form-control" type="number" min="1" max="8" value="4" placeholder="Maximum" id="end_hr" name="end_hr"  data-toggle="tooltip" data-placement="top" title="Max. hours (1-8) here">
+                                        <div class="input-group-append">
+                                            <div class="input-group-text d-none d-sm-block">hours</div>
                                         </div>
                                     </div>
                                 </div>
@@ -156,7 +156,10 @@
                     });
 
                 document.addEventListener('DOMContentLoaded', function () {
-                    startPicker.setDate(new Date(), true);
+                    var coeff = 1000 * 60 * 5;
+                    var date = new Date();
+                    var rounded_date = new Date(Math.ceil(date.getTime() / coeff) * coeff);
+                    startPicker.setDate(rounded_date, true);
                 }, false);
 
                 var marker_locations = {{ markers }}.map(function(carpark) { return {lat: carpark[0], lng: carpark[1] } })
@@ -167,7 +170,7 @@
                         location: { latitude: {{ center[0] }}, longitude: {{ center[1] }} },
                         radius: 50,
                     {% else %}
-                        location: { latitude: 1.287953, longitude: 103.851784 },
+                        location: { latitude: 1.2864, longitude: 103.8531 },
                         radius: 500,
                     {% endif %}
                     inputBinding: {
@@ -178,7 +181,7 @@
                     },
                     enableAutocomplete: true,
                     autocompleteOptions: { componentRestrictions: { country: 'sg' } },
-                    addressFormat: 'street_address',
+                    addressFormat: 'point_of_interest', //'street_address',
                     oninitialized: function(component) {
                         var mapContext = $(component).locationpicker('map').map;
                         var markers = marker_locations.map(function(location, i) {
