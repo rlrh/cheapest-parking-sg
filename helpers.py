@@ -100,30 +100,10 @@ def nearby_carparks(data, center_location, radius, schema):
     for i, carpark in enumerate(data):
         distance = vincenty(center_location, carpark[schema["location"]]).m
         if distance <= radius:
-            result.append(carpark)
+            result.append(deepcopy(carpark))
             result[-1][schema["distance"]] = distance
             result[-1][schema["index"]] = i
     return result
-
-
-# returns a list of nearby carparks with each element as the complete data for each carpark, plus price and lots
-def cheapest_carparks_within_radius(data, center_location, radius, start_datetime, end_datetime, schema):
-
-    valid_data = nearby_carparks(data, center_location, radius, schema)
-    if not valid_data:
-        return []
-    available_lots = carparks_availability(valid_data, schema)
-    for carpark in valid_data:
-        carpark[schema["price"]] = carpark_charges(carpark, start_datetime, end_datetime, schema)
-
-        #try:
-        if carpark[schema["carpark_id"]] in available_lots:
-            carpark[schema["lots"]] = available_lots[carpark[schema["carpark_id"]]]
-        else:
-            carpark[schema["lots"]] = -1
-        #except:
-        #    carpark[schema["lots"]] = -1
-    return valid_data
 
 # warning - sorts in place
 def sort_carparks(data, schema, price_first=True):
@@ -140,18 +120,37 @@ def sort_carparks(data, schema, price_first=True):
             data.append(data.pop(0))
         data.sort(key = lambda carpark: carpark[schema["distance"]])
 
+# returns a list of nearby carparks with each element as the complete data for each carpark, plus price and lots
+def cheapest_carparks_within_radius(data, center_location, radius, start_datetime, end_datetime, schema):
+
+    valid_data = nearby_carparks(data, center_location, radius, schema)
+    if not valid_data:
+        return []
+    available_lots = carparks_availability(valid_data, schema)
+    for carpark in valid_data:
+        carpark[schema["price"]] = carpark_charges(carpark, start_datetime, end_datetime, schema)
+        try:
+            if carpark[schema["carpark_id"]] in available_lots:
+                carpark[schema["lots"]] = available_lots[carpark[schema["carpark_id"]]]
+            else:
+                carpark[schema["lots"]] = -1
+        except:
+            carpark[schema["lots"]] = -1
+    sort_carparks(valid_data, schema)
+    return valid_data
+
 def add_carparks_availability(data, schema):
     if not data:
         return data
     available_lots = carparks_availability(data, schema)
     for carpark in data:
-        #try:
-        if carpark[schema["carpark_id"]] in available_lots:
-            carpark[schema["lots"]] = available_lots[carpark[schema["carpark_id"]]]
-        else:
+        try:
+            if carpark[schema["carpark_id"]] in available_lots:
+                carpark[schema["lots"]] = available_lots[carpark[schema["carpark_id"]]]
+            else:
+                carpark[schema["lots"]] = -1
+        except:
             carpark[schema["lots"]] = -1
-        #except:
-        #    carpark[schema["lots"]] = -1
     return data
 
 def cheapest_carparks_for_durations(data, center_location, radius, start_datetime, start_hr, end_hr, schema):

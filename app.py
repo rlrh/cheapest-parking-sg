@@ -3,6 +3,7 @@ import requests
 from flask import Flask, flash, redirect, render_template, request, session, url_for, jsonify, abort
 from datetime import date, time, datetime, timedelta
 from geopy.distance import vincenty
+from copy import deepcopy
 from helpers import *
 
 data_file = "data-minified-16072018.json"
@@ -35,8 +36,6 @@ def index():
             lat = float(request.form["lat"])
             lng = float(request.form["lng"])
             center_loc = [lat, lng]
-            #raw_loc = request.form["center"].split(" ")
-            #center_loc = list(map(lambda x: float(x), raw_loc))
         except Exception as e:
             messages.append("Center location invalid.")
             messages.append(str(e))
@@ -47,7 +46,6 @@ def index():
             messages.append(str(e))
         try:
             cheapest_carparks = cheapest_carparks_within_radius(data, center_loc, radius, from_datetime, to_datetime, schema)
-            sort_carparks(cheapest_carparks, schema)
         except Exception as e:
             messages.append("Error ocurred while searching for carparks")
             messages.append(str(e))
@@ -88,6 +86,15 @@ def api_all():
 
 @app.route('/api/single')
 def api_single():
+    try:
+        carpark_id = int(request.args["id"])
+        #
+        return jsonify(data[carpark_id], schema)
+    except Exception as e:
+        return str(e)
+
+@app.route('/api/singleprice')
+def api_single_price():
     messages = []
     try:
         from_datetime = datetime.strptime(request.args["start"], "%Y-%m-%dT%H:%M")
@@ -102,13 +109,22 @@ def api_single():
     except Exception as e:
         messages.append("Carpark ID invalid. " + str(e))
     try:
-        charges = carpark_charges(data[carpark_id], from_datetime, to_datetime, schema)
+        priceonly = bool(request.args.get("priceonly", 0))
+    except Exception as e:
+        messages.append("Price only invalid. " + str(e))
+    try:
+        carpark = deepcopy(data[carpark_id])
+        charges = carpark_charges(carpark, from_datetime, to_datetime, schema)
     except Exception as e:
         messages.append("Error occurred. " + str(e))
     if messages:
-        return abort(400)
+        return jsonify(messages)
     else:
-        return jsonify(charges)
+        if priceonly:
+            return jsonify(charges)
+        else:
+            carpark[schema["price"]] = charges
+            return jsonify(carpark)
 
 @app.route('/api/multiple')
 def api_multiple():
@@ -134,7 +150,6 @@ def api_multiple():
         messages.append("Radius invalid. " + str(e))
     try:
         cheapest_carparks = cheapest_carparks_within_radius(data, center_loc, radius, from_datetime, to_datetime, schema)
-        sort_carparks(cheapest_carparks, schema)
     except Exception as e:
         messages.append("Error ocurred while searching for carparks. " + str(e))
 
@@ -201,3 +216,10 @@ def fuzzy():
 @app.route('/calc')
 def calculator():
     return render_template("calculator.html", data=add_carparks_availability(data, schema), schema=schema)
+
+@app.route('/browse2')
+def browse2():
+    carpark_id = int(request.args.get('id', -1))
+    markers = list(map(lambda carpark: carpark[schema["location"]], data))
+    add_carparks_availability(data, schema)
+    return render_template("browse2.html", markers=markers, id=carpark_id)

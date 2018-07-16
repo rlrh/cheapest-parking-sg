@@ -177,13 +177,25 @@
 
                 //contentString += "<p class='text-muted'><small>Updated " + carpark[schema.updated] + "</small></p>"
 
+
                 var link = "{{ url_for('index', id=index) }}" + String(index);
                 contentString += "<div class='d-flex justify-content-between mt-3'>"
-                contentString += ("<a class='card-link text-info' href='" + link + "' class='card-link'>Calculate Charges</a>");
+                //contentString += ("<a class='card-link text-info' href='" + link + "' class='card-link'>Calculate Charges</a>");
                 var directions_link = "https://www.google.com/maps/dir/?api=1&destination=" + carpark[schema.location][0] + "," + carpark[schema.location][1] + "&travelmode=driving";
                 contentString += ("<a class='card-link text-info' href='" + directions_link + "' class='card-link'>Get Directions</a>");
-                contentString += "</div>"
                 contentString += "</div>";
+                contentString += "<div class='d-flex justify-content-between mt-3'>"
+                contentString += "<span class='text-muted'>From</span>"
+                contentString += "<input id='start' name='start' class='flatpickr flatpickr-input form-control form-control-sm' placeholder='Select start date and time..' type='text' readonly='readonly'>";
+                contentString += "</div>";
+                contentString += "<div class='d-flex justify-content-between mt-2'>"
+                contentString += "<span class='text-muted'>To</span>"
+                contentString += "<input id='end' name='end' class='flatpickr flatpickr-input form-control form-control-sm' placeholder='Select end date and time..' type='text' readonly='readonly'>";
+                contentString += "</div>";
+                contentString += "<h6 id='price' data-carparkindex=' " + index + " ' class='card-subtitle my-3 text-muted'>loading</h6>"
+                contentString += "</div>";
+                contentString += "</div>";
+
 
                 // set info window's content
                 info.setContent(contentString);
@@ -191,6 +203,59 @@
                 // open info window (if not already open)
                 info.open(map, markers[index]);
             }
+
+            google.maps.event.addListener(info,'domready',function(){
+                function calculate() {
+                    $.ajax({
+                        type: "GET", // The method of sending data can be with GET or POST
+                        url: "/api/singleprice", // Fill in url / php file path to destination
+                        data: {id: document.getElementById("price").getAttribute('data-carparkindex'), start: document.getElementById("start").value, end: document.getElementById("end").value, priceonly:1}, // data to be sent to the process file
+                        dataType: "json",
+                        // document.getElementById("price").getAttribute('data-carparkindex')
+                    })
+                    .done(function( price ) {
+                        var dollars = price / 100;
+                        document.getElementById("price").innerHTML = dollars.toLocaleString('en-SG', {style: 'currency', currency: 'SGD'});
+                      });
+                }
+                var startPicker = flatpickr("#start",
+                    {
+                        enableTime: true,
+                        dateFormat: "Y-m-dTH:i",
+                        altInput: true,
+                        altFormat: "D, j F Y, h:i K",
+                        defaultDate: "today",
+                        minDate: "today",
+                        onChange: function (selectedDates, dateStr, instance) {
+                            if (endPicker.selectedDates[0] < selectedDates[0]) {
+                                endPicker.setDate(selectedDates[0], true);
+                            }
+                            calculate();
+                        }
+                    });
+                var endPicker = flatpickr("#end",
+                    {
+                        enableTime: true,
+                        dateFormat: "Y-m-dTH:i",
+                        altInput: true,
+                        altFormat: "D, j F Y, h:i K",
+                        defaultDate: "today",
+                        minDate: "today",
+                        onChange: function (selectedDates, dateStr, instance) {
+                            if (selectedDates[0] < startPicker.selectedDates[0]) {
+                                startPicker.setDate(selectedDates[0], true);
+                            }
+                            calculate();
+                        }
+                    });
+                var time_diff = 120;
+                var coeff = 1000 * 60 * 5;
+                var date = new Date();
+                var rounded_date = new Date(Math.ceil(date.getTime() / coeff) * coeff);
+                startPicker.setDate(rounded_date , true);
+                endPicker.setDate(new Date(startPicker.selectedDates[0].getTime() + time_diff*60000), true);
+                calculate();
+            });
 
             // add markers
             carparks.forEach(function (carpark, index) {
