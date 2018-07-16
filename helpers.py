@@ -127,6 +127,8 @@ def cheapest_carparks_within_radius(data, center_location, radius, start_datetim
 
 # warning - sorts in place
 def sort_carparks(data, schema, price_first=True):
+    if not data:
+        return []
     if price_first == True:
         data.sort(key = lambda carpark: carpark[schema["distance"]])
         data.sort(key = lambda carpark: carpark[schema["price"]])
@@ -139,6 +141,8 @@ def sort_carparks(data, schema, price_first=True):
         data.sort(key = lambda carpark: carpark[schema["distance"]])
 
 def add_carparks_availability(data, schema):
+    if not data:
+        return data
     available_lots = carparks_availability(data, schema)
     for carpark in data:
         #try:

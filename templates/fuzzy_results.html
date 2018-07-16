@@ -114,8 +114,8 @@
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between">
                             <div class="d-flex flex-column">
+                                <span class="text-muted">Price</span>
                                 {% if result[schema["price"]] != -1 %}
-                                    <span class="text-muted">Price</span>
                                     <span class="lead">${{ '%0.2f'| format(result[schema["price"]]/100) }}</span>
                                 {% else %}
                                     <span class="text-danger lead" >Closed</span>

@@ -5,7 +5,7 @@ from datetime import date, time, datetime, timedelta
 from geopy.distance import vincenty
 from helpers import *
 
-data_file = "data-minified-11072018.json"
+data_file = "data-minified-16072018.json"
 data_schema_file = "data-schema.json"
 
 app = Flask(__name__)
@@ -197,3 +197,7 @@ def fuzzy():
     else:
         markers = list(map(lambda carpark: carpark[schema["location"]], data))
         return render_template("fuzzy.html", markers=markers, schema=schema)
+
+@app.route('/calc')
+def calculator():
+    return render_template("calculator.html", data=add_carparks_availability(data, schema), schema=schema)

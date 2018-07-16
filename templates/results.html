@@ -132,8 +132,8 @@
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between">
                             <div class="d-flex flex-column">
+                                <span class="text-muted">Price</span>
                                 {% if result[schema["price"]] != -1 %}
-                                    <span class="text-muted">Price</span>
                                     <span class="lead">${{ '%0.2f'| format(result[schema["price"]]/100) }}</span>
                                 {% else %}
                                     <span class="text-danger lead" >Closed</span>
@@ -158,6 +158,16 @@
                 </div>
             </div>
         {% endfor %}
+        {% if results|length == 0 %}
+            <div class="col mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">No results</h5>
+                        <h6 class="card-subtitle"><a href="{{ url_for('index') }}" class="text-info">Search again?</a></h6>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
             <div class="col mb-3">
                 <span class="text-muted"><small>Price may not include GST.</small></span>
                 <p class="text-muted"><small>Distance as the crow flies.</small></p>
