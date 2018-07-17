@@ -45,7 +45,12 @@ def index():
             messages.append("Radius invalid.")
             messages.append(str(e))
         try:
-            cheapest_carparks = cheapest_carparks_within_radius(data, center_loc, radius, from_datetime, to_datetime, schema)
+            radio = bool(int(request.form["radio"]))
+        except Exception as e:
+            messages.append("Sorting method invalid.")
+            messages.append(str(e))
+        try:
+            cheapest_carparks = cheapest_carparks_within_radius(data, center_loc, radius, from_datetime, to_datetime, schema, pricefirst=radio)
         except Exception as e:
             messages.append("Error ocurred while searching for carparks")
             messages.append(str(e))

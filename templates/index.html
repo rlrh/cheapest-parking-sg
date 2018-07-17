@@ -34,7 +34,7 @@
 
         @media (min-width: 768px) {
             .map-container:before {
-                padding-top: 66%;
+                padding-top: 75%;
             }
         }
 </style>
@@ -68,9 +68,9 @@
                 <div class="row">
                     <div class="col-lg-6">
                         {% if name is defined %}
-                            <div class="row mt-3 d-none">
+                        <div class="row mt-3 d-none">
                         {% else %}
-                            <div class="row mt-3">
+                        <div class="row mt-3">
                         {% endif %}
                             <label for="center" class="col-2 lead">At</label>
                             <div class="col-10">
@@ -79,36 +79,28 @@
                         </div>
                         <div class="row mt-3 d-none">
                             <label for="lat" class="col-2 lead">Or</label>
-                            <div class="col-10">
-                                <div class="row">
-                                    <div class="col input-group">
-                                        <input class="form-control" type="text" placeholder="latitude" id="lat" name="lat">
-                                        <input class="form-control" type="text" placeholder="longitude" id="lng" name="lng">
-                                    </div>
-                                </div>
+                            <div class="col-10 input-group">
+                                <input class="form-control" type="text" placeholder="latitude" id="lat" name="lat">
+                                <input class="form-control" type="text" placeholder="longitude" id="lng" name="lng">
                             </div>
                         </div>
                         {% if name is defined %}
-                            <div class="row mt-3 d-none">
+                        <div class="row mt-3 d-none">
                         {% else %}
-                            <div class="row mt-3">
+                        <div class="row mt-3">
                         {% endif %}
                             <label for="radius" class="col-2 lead">Within</label>
-                            <div class="col-10">
-                                <div class="row">
-                                    <div class="col input-group">
-                                        <input class="form-control" type="number" min="0" max="5000" value="500" list="common_radii" id="radius" name="radius" data-toggle="tooltip" data-placement="top" title="Search radius (0-5000m)" />
-                                        <datalist id="common_radii">
-                                            <option value="0">
-                                            <option value="200">
-                                            <option value="500">
-                                            <option value="1000">
-                                            <option value="2000">
-                                        </datalist>
-                                        <div class="input-group-append">
-                                            <div class="input-group-text">metres</div>
-                                        </div>
-                                    </div>
+                            <div class="col-10 input-group">
+                                <input class="form-control" type="number" min="0" max="5000" value="500" list="common_radii" id="radius" name="radius" data-toggle="tooltip" data-placement="top" title="Search radius (0-5000m)" />
+                                <datalist id="common_radii">
+                                    <option value="0">
+                                    <option value="200">
+                                    <option value="500">
+                                    <option value="1000">
+                                    <option value="2000">
+                                </datalist>
+                                <div class="input-group-append">
+                                    <div class="input-group-text">metres</div>
                                 </div>
                             </div>
                         </div>
@@ -130,6 +122,21 @@
                                 {% endif %}
                             </div>
                         </div>
+                        <div class="row mt-3">
+                            <label for="radio1" class="col-2 lead">Sort by</label>
+                            <div class="col-10">
+                                <div class="row">
+                                    <div class="col-sm-6 input-group custom-control custom-radio">
+                                        <input type="radio" id="radio1" name="radio" value="1" class="custom-control-input" checked="">
+                                        <label class="custom-control-label" for="radio1">Cheapest, then nearest</label>
+                                    </div>
+                                    <div class="col-sm-6 input-group custom-control custom-radio">
+                                        <input type="radio" id="radio0" name="radio" value="0" class="custom-control-input">
+                                        <label class="custom-control-label" for="radio0">Nearest, then cheapest</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row my-3">
                             <div class="col text-center">
                                 {% if name is defined %}
@@ -149,6 +156,10 @@
 
             </form>
             <script>
+                if(navigator.userAgent.match(/Windows Phone/i)){
+                        alert("Incompatiible");
+                };
+
                 {% if center is defined %}
                      // console.log({{ center }});
                 {% endif %}
@@ -157,36 +168,75 @@
                   $('[data-toggle="tooltip"]').tooltip()
                 })
 
-                // datetime pickers
-                var time_diff = 120;
-                var startPicker = flatpickr("#start",
-                    {
-                        enableTime: true,
-                        dateFormat: "Y-m-dTH:i",
-                        altInput: true,
-                        altFormat: "D, j F Y, h:i K",
-                        defaultDate: "today",
-                        minDate: "today",
-                        onChange: function (selectedDates, dateStr, instance) {
-                            if (endPicker.selectedDates[0] < selectedDates[0]) {
-                                endPicker.setDate(selectedDates[0], true);
+                if(navigator.userAgent.match(/Windows Phone/i)){
+
+                    // datetime pickers
+                    var time_diff = 120;
+                    var startPicker = flatpickr("#start",
+                        {
+                            disableMobile: true,
+                            enableTime: true,
+                            dateFormat: "Y-m-dTH:i",
+                            altInput: true,
+                            altFormat: "D, j F Y, h:i K",
+                            defaultDate: "today",
+                            minDate: "today",
+                            onChange: function (selectedDates, dateStr, instance) {
+                                if (endPicker.selectedDates[0] < selectedDates[0]) {
+                                    endPicker.setDate(selectedDates[0], true);
+                                }
                             }
-                        }
-                    });
-                var endPicker = flatpickr("#end",
-                    {
-                        enableTime: true,
-                        dateFormat: "Y-m-dTH:i",
-                        altInput: true,
-                        altFormat: "D, j F Y, h:i K",
-                        defaultDate: "today",
-                        minDate: "today",
-                        onChange: function (selectedDates, dateStr, instance) {
-                            if (selectedDates[0] < startPicker.selectedDates[0]) {
-                                startPicker.setDate(selectedDates[0], true);
+
+                        });
+                    var endPicker = flatpickr("#end",
+                        {
+                            disableMobile: true,
+                            enableTime: true,
+                            dateFormat: "Y-m-dTH:i",
+                            altInput: true,
+                            altFormat: "D, j F Y, h:i K",
+                            defaultDate: "today",
+                            minDate: "today",
+                            onChange: function (selectedDates, dateStr, instance) {
+                                if (selectedDates[0] < startPicker.selectedDates[0]) {
+                                    startPicker.setDate(selectedDates[0], true);
+                                }
                             }
-                        }
-                    });
+                        });
+                } else {
+
+                    // datetime pickers
+                    var time_diff = 120;
+                    var startPicker = flatpickr("#start",
+                        {
+                            enableTime: true,
+                            dateFormat: "Y-m-dTH:i",
+                            altInput: true,
+                            altFormat: "D, j F Y, h:i K",
+                            defaultDate: "today",
+                            minDate: "today",
+                            onChange: function (selectedDates, dateStr, instance) {
+                                if (endPicker.selectedDates[0] < selectedDates[0]) {
+                                    endPicker.setDate(selectedDates[0], true);
+                                }
+                            }
+
+                        });
+                    var endPicker = flatpickr("#end",
+                        {
+                            enableTime: true,
+                            dateFormat: "Y-m-dTH:i",
+                            altInput: true,
+                            altFormat: "D, j F Y, h:i K",
+                            defaultDate: "today",
+                            minDate: "today",
+                            onChange: function (selectedDates, dateStr, instance) {
+                                if (selectedDates[0] < startPicker.selectedDates[0]) {
+                                    startPicker.setDate(selectedDates[0], true);
+                                }
+                            }
+                        });
+                }
 
                 document.addEventListener('DOMContentLoaded', function () {
                     var coeff = 1000 * 60 * 5;

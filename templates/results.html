@@ -183,7 +183,9 @@
         // The location of center
         var center = {lat: {{ search_params["center"][0] }}, lng: {{ search_params["center"][1] }}};
         // The map, centered
-        var map = new google.maps.Map(document.getElementById('map'), {zoom: 15, center: center});
+        var map = new google.maps.Map(document.getElementById('map')); // , {zoom: 15, center: center}
+
+        var markers = [];
 
         {% for result in results %}
             var info = "{% if result[schema['price']] == -1 %}Closed{% else %}${{ '%0.2f'| format(result[schema['price']]/100) }}{% endif %} {{ '%0.0f'| format(result[schema['distance']]) }}m";
@@ -210,10 +212,19 @@
                 var element = document.getElementById("card{{ loop.index }}");
                 element.scrollIntoView({behavior: "smooth"});
             });
+
+            markers.push(marker);
         {% endfor %}
 
         // The marker, positioned at center
         var marker = new google.maps.Marker({position: center, map: map});
+        markers.push(marker);
+
+        var bound = new google.maps.LatLngBounds();
+        for(var i in markers) {
+            bound.extend(markers[i].getPosition());
+        }
+        map.fitBounds(bound);
 
     }, false);
 

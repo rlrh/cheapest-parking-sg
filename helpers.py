@@ -112,16 +112,20 @@ def sort_carparks(data, schema, price_first=True):
     if price_first == True:
         data.sort(key = lambda carpark: carpark[schema["distance"]])
         data.sort(key = lambda carpark: carpark[schema["price"]])
-        while data[0][schema["price"]] == -1:
-            data.append(data.pop(0))
+        #if len(list(filter(lambda carpark: carpark[schema["price"]] != -1, data))) > 0:
+        if len([1 for carpark in data if carpark[schema["price"]] != -1]) > 0:
+            while data[0][schema["price"]] == -1:
+                data.append(data.pop(0))
     else:
         data.sort(key = lambda carpark: carpark[schema["price"]])
-        while data[0][schema["price"]] == -1:
-            data.append(data.pop(0))
+        #if len(list(filter(lambda carpark: carpark[schema["price"]] != -1, data))) > 0:
+        if len([1 for carpark in data if carpark[schema["price"]] != -1]) > 0:
+            while data[0][schema["price"]] == -1:
+                data.append(data.pop(0))
         data.sort(key = lambda carpark: carpark[schema["distance"]])
 
 # returns a list of nearby carparks with each element as the complete data for each carpark, plus price and lots
-def cheapest_carparks_within_radius(data, center_location, radius, start_datetime, end_datetime, schema):
+def cheapest_carparks_within_radius(data, center_location, radius, start_datetime, end_datetime, schema, pricefirst=True):
 
     valid_data = nearby_carparks(data, center_location, radius, schema)
     if not valid_data:
