@@ -7,28 +7,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.1.1/lux/bootstrap.min.css" rel="stylesheet" integrity="sha384-4KIc2mnKfAA7VjirNLk2Sqp7jxFNq1q8+FhYGxhW2l52lt4HJsfksL+hjswHfbl/"
-        crossorigin="anonymous">
+    <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.1.1/lux/bootstrap.min.css" rel="stylesheet" integrity="sha384-4KIc2mnKfAA7VjirNLk2Sqp7jxFNq1q8+FhYGxhW2l52lt4HJsfksL+hjswHfbl/" crossorigin="anonymous">
 
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/solid.css" integrity="sha384-TbilV5Lbhlwdyc4RuIV/JhD8NR+BfMrvz4BL5QFa2we1hQu6wvREr3v6XSRfCTRp"
         crossorigin="anonymous">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/fontawesome.css" integrity="sha384-ozJwkrqb90Oa3ZNb+yKFW2lToAWYdTiF1vt8JiH5ptTGHTGcN7qdoR1F95e0kYyG"
         crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/fontawesome-markers@4.6.1/fontawesome-markers.min.js"></script>
 
     <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 
     <!-- Google Maps -->
     <script type="text/javascript" src="https://maps.google.com/maps/api/js?key=AIzaSyBZqDJL1HZ48kHFCyqR7MfJvCeips9mQoE&libraries=places"></script>
     <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
 
     <!-- Flatpickr Datetime Picker -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.2.20171210/classList.min.js"></script>
+    <!--[if IE 9]>
+        <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/ie.css">
+    <![endif]-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
+    {% if name is defined %}
+    <title>Carparks SG: {{name}} Parking Charges Calculator</title>
+    {% else %}
     <title>Carparks SG: Browse All Carparks & Calculate Parking Charges</title>
+    {% endif %}
 
     <style>
         html,
@@ -62,11 +68,11 @@
 
 <body>
     <div class="d-flex h-100 flex-column">
-        <nav class="navbar navbar-expand-sm navbar-dark bg-info">
+        <nav class="navbar py-3 navbar-expand-sm navbar-dark bg-info">
             <div class="container d-flex justify-content-between">
                 <a class="navbar-brand" href="{{ url_for('index') }}">
                     <i class="fas fa-parking"></i>
-                    <span class="mx-1">Carparks SG</span>
+                    <span class="mx-1">Carparks SG <span style="vertical-align: 75%; font-size:0.5rem;">alpha</span></span>
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
                     aria-label="Toggle navigation">
@@ -89,9 +95,11 @@
                 </div>
             </div>
         </nav>
-        <div class="container">
-            <div class="row my-2">
-                <input class="col form-control form-control-sm" type="text" placeholder="Type a place or address" id="place" name="place">
+        <div class="bg-info">
+            <div class="container">
+                <div class="row mb-2">
+                    <input class="col form-control form-control-sm" type="text" placeholder="Type a place or address" id="place" name="place">
+                </div>
             </div>
         </div>
         <div class="flex-grow-1" id="map"></div>
@@ -107,13 +115,14 @@
 
             // initializations
             var map = new google.maps.Map(document.getElementById('map'), {
-            {% if id != -1 %}
-                center: { lat: {{ data[id][schema["location"]][0] }}, lng: {{ data[id][schema["location"]][1] }} },
+            {% if id is defined %}
+                center: { lat: {{ data[id][schema.location][0] }}, lng: {{ data[id][schema.location][1] }} },
                 zoom: 17,
             {% else %}
                 center: { lat: 1.3521, lng: 103.8198 },
                 zoom: 11,
             {% endif %}
+                clickableIcons: false
             });
             var markers = [];
             var info = new google.maps.InfoWindow();
@@ -162,19 +171,23 @@
                     contentString += "<p class='text-success'>" + carpark[schema.lots] + " lots now</p>";
                 }
                 var directions_link = "https://www.google.com/maps/dir/?api=1&destination=" + carpark[schema.location][0] + "," + carpark[schema.location][1] + "&travelmode=driving";
-                contentString += "<p><a class='card-link text-info' href='" + directions_link + "' class='card-link'>Get Directions</a></p>";
+                contentString += "<p><a class='card-link text-info' href='" + directions_link + "' class='card-link'><i class='fas fa-location-arrow'></i> Get Directions</a></p>";
                 contentString += "</div>";
 
+                var compare_link = "{{ url_for('index', id=index) }}" + String(index);
                 contentString += "<strong class='text-primary'>Calculate Parking Charges</strong>\
-                                <div class='d-flex justify-content-between mt-1'>\
-                                    <span class='text-muted mr-2'>From</span>\
-                                    <input id='start' name='start' class='flatpickr flatpickr-input form-control form-control-sm' placeholder='Select start date and time..' type='text' readonly='readonly'>\
-                                </div>\
-                                <div class='d-flex justify-content-between mt-1'>\
-                                    <span class='text-muted mr-2'>To</span>\
-                                    <input id='end' name='end' class='flatpickr flatpickr-input form-control form-control-sm' placeholder='Select end date and time..' type='text' readonly='readonly'>\
-                                </div>\
-                                <h5 class='card-title mt-2 mb-3' id='price' data-carparkindex=' " + index + " '>Loading...</h5>"
+                                    <div class='d-flex justify-content-between mt-1'>\
+                                        <span class='text-muted mr-2'>From</span>\
+                                        <input id='start' name='start' class='flatpickr flatpickr-input form-control form-control-sm' placeholder='Select start date and time..' type='text' readonly='readonly'>\
+                                    </div>\
+                                    <div class='d-flex justify-content-between mt-1'>\
+                                        <span class='text-muted mr-2'>To</span>\
+                                        <input id='end' name='end' class='flatpickr flatpickr-input form-control form-control-sm' placeholder='Select end date and time..' type='text' readonly='readonly'>\
+                                    </div>\
+                                    <div class='d-flex justify-content-between'>\
+                                        <h5 class='card-title mt-2 mb-3' id='price' data-carparkindex=' " + index + " '>Loading...</h6>\
+                                        <a class='card-link text-info mt-2' href='" + compare_link + "' class='card-link'><i class='fas fa-list-ol'></i> Compare Nearby</a>\
+                                    </div>"
 
                 carpark[schema.human_rates].forEach(function (rate) {
                     temp =
@@ -257,8 +270,6 @@
                     endPicker.setDate(new Date(startPicker.selectedDates[0].getTime() + time_diff*60000), false); // set rounded datetime + time diff on end
                     calculate(); // display carpark charges
                 });
-
-
             }
 
             // add markers
@@ -274,18 +285,17 @@
                 });
                 markers.push(marker);
             });
-            var markerCluster = new MarkerClusterer(map, markers, {maxZoom: 14, imagePath: 'https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclustererplus/images/m'});
-
-            {% if id != -1 %}
-                new google.maps.event.trigger(markers[{{ id }}], 'click' );
+            // enable markerclusterer
+            var markerCluster = new MarkerClusterer(map, markers, {maxZoom: 15, imagePath: 'https://raw.githubusercontent.com/googlemaps/v3-utility-library/master/markerclustererplus/images/m'});
+            {% if id is defined %}
+            new google.maps.event.trigger(markers[{{ id }}], 'click' );
             {% endif %}
         }
-
+        // call initialize function
         google.maps.event.addDomListener(window, 'load', initialize(map));
     </script>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
         crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T"

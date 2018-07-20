@@ -6,9 +6,6 @@
 
 {% block style %}
     <style>
-        /* Always set the map height explicitly to define the size of the div
-            * element that contains the map. */
-
         .map-container {
             position: relative;
         }
@@ -33,8 +30,6 @@
                 padding-top: 56.25%;
             }
         }
-
-
     </style>
 {% endblock %}
 
@@ -54,7 +49,7 @@
 
 {% block main %}
         <form action="{{ url_for('fuzzy') }}" method="post">
-                <div class="row mt-3">
+                <div class="row mt-4">
                     <div class="col">
                         <h3>Don't know when you'll leave?</h3>
                         <p>Find the cheapest carpark for a range of durations.</p>
@@ -143,8 +138,7 @@
                   $('[data-toggle="tooltip"]').tooltip()
                 })
 
-                // datetime pickers
-                var time_diff = 120;
+                // datetime picker
                 var startPicker = flatpickr("#start",
                     {
                         enableTime: true,
@@ -165,12 +159,13 @@
                 var marker_locations = {{ markers }}.map(function(carpark) { return {lat: carpark[0], lng: carpark[1] } })
                 // console.log(marker_locations)
 
+                // initialize jquery location picker
                 $('#map').locationpicker({
                     {% if center is defined%}
                         location: { latitude: {{ center[0] }}, longitude: {{ center[1] }} },
                         radius: 50,
                     {% else %}
-                        location: { latitude: 1.2864, longitude: 103.8531 },
+                        location: { latitude: 1.2864, longitude: 103.8531 }, // Fullerton/GPO
                         radius: 500,
                     {% endif %}
                     inputBinding: {

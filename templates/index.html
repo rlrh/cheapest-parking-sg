@@ -5,9 +5,6 @@
 {% endblock %}
 {% block style %}
 <style>
-        /* Always set the map height explicitly to define the size of the div
-            * element that contains the map. */
-
         .map-container {
             position: relative;
         }
@@ -24,8 +21,8 @@
             bottom: 0;
             right: 0;
             left: 0;
-            /* only for testing */
         }
+
         @media (min-width: 576px) {
             .map-container:before {
                 padding-top: 56.25%;
@@ -58,11 +55,12 @@
                 <div class="row mt-4">
                     <div class="col">
                         {% if name is defined %}
-                            <h3>{{name}} parking charges</h3>
+                        <h3>Find cheapest carparks around {{name}}</h3>
+                        <p class="d-none d-md-block">Compare parking charges of nearby carparks based on these parameters:</p>
                         {% else %}
-                            <h3>Find cheapest carparks</h3>
+                        <h3>Find cheapest carparks</h3>
+                        <p class="d-none d-md-block">Compare parking charges of carparks all over Singapore to find the best price.</p>
                         {% endif %}
-                        <p class="d-none d-md-block">We'll calculate parking charges of nearby carparks based on these parameters:</p>
                     </div>
                 </div>
                 <div class="row">
@@ -84,11 +82,7 @@
                                 <input class="form-control" type="text" placeholder="longitude" id="lng" name="lng">
                             </div>
                         </div>
-                        {% if name is defined %}
-                        <div class="row mt-3 d-none">
-                        {% else %}
                         <div class="row mt-3">
-                        {% endif %}
                             <label for="radius" class="col-2 lead">Within</label>
                             <div class="col-10 input-group">
                                 <input class="form-control" type="number" min="0" max="5000" value="500" list="common_radii" id="radius" name="radius" data-toggle="tooltip" data-placement="top" title="Search radius (0-5000m)" />
@@ -122,7 +116,11 @@
                                 {% endif %}
                             </div>
                         </div>
+                        {% if name is defined %}
+                        <div class="row mt-3 d-none">
+                        {% else %}
                         <div class="row mt-3">
+                        {% endif %}
                             <label for="radio1" class="col-2 lead">Sort by</label>
                             <div class="col-10">
                                 <div class="row">
@@ -139,11 +137,7 @@
                         </div>
                         <div class="row my-3">
                             <div class="col text-center">
-                                {% if name is defined %}
-                                    <input type="submit" class="btn btn-success btn-block" value="Calculate">
-                                {% else %}
-                                    <input type="submit" class="btn btn-success btn-block" value="Find Cheapest Carparks">
-                                {% endif %}
+                                <input type="submit" class="btn btn-success btn-block" value="Find Cheapest Carparks">
                             </div>
                         </div>
                     </div>
@@ -157,12 +151,8 @@
             </form>
             <script>
                 if(navigator.userAgent.match(/Windows Phone/i)){
-                        alert("Incompatiible");
+                        alert("Incompatible web browser - user experience may be suboptimal");
                 };
-
-                {% if center is defined %}
-                     // console.log({{ center }});
-                {% endif %}
 
                 $(function () {
                   $('[data-toggle="tooltip"]').tooltip()
@@ -171,7 +161,6 @@
                 if(navigator.userAgent.match(/Windows Phone/i)){
 
                     // datetime pickers
-                    var time_diff = 120;
                     var startPicker = flatpickr("#start",
                         {
                             disableMobile: true,
@@ -206,7 +195,6 @@
                 } else {
 
                     // datetime pickers
-                    var time_diff = 120;
                     var startPicker = flatpickr("#start",
                         {
                             enableTime: true,
@@ -238,25 +226,27 @@
                         });
                 }
 
+                // set start & end picker to nice datetimes
                 document.addEventListener('DOMContentLoaded', function () {
+                    var time_diff = 120;
                     var coeff = 1000 * 60 * 5;
                     var date = new Date();
                     var rounded_date = new Date(Math.ceil(date.getTime() / coeff) * coeff);
-                    startPicker.setDate(rounded_date , true);
-                    endPicker.setDate(new Date(startPicker.selectedDates[0].getTime() + time_diff*60000), true);
+                    startPicker.setDate(rounded_date, false);
+                    endPicker.setDate(new Date(startPicker.selectedDates[0].getTime() + time_diff*60000), false);
                 }, false);
 
-                var marker_locations = {{ markers }}.map(function(carpark) { return {lat: carpark[0], lng: carpark[1] } })
+                var marker_locations = {{ markers }}.map(function(location) { return {lat: location[0], lng: location[1] } })
                 // console.log(marker_locations)
 
+                // initialize jquery location picker
                 $('#map').locationpicker({
-                    {% if center is defined%}
+                    {% if center is defined %}
                         location: { latitude: {{ center[0] }}, longitude: {{ center[1] }} },
-                        radius: 50,
                     {% else %}
-                        location: { latitude: 1.286194, longitude: 103.853032 },
-                        radius: 500,
+                        location: { latitude: 1.286194, longitude: 103.853032 }, // Fullerton/GPO
                     {% endif %}
+                    radius: 500,
                     inputBinding: {
                         latitudeInput: $('#lat'),
                         longitudeInput: $('#lng'),
@@ -278,5 +268,4 @@
                     }
                 });
             </script>
-            <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
 {% endblock %}

@@ -88,7 +88,8 @@ def all_carparks_availability():
 # returns a dictionary with key as carpark id and value as available lots
 def carparks_availability(carparks, schema):
     result = {}
-    carpark_ids = list(map(lambda carpark: str(carpark[schema["carpark_id"]]), carparks))
+    carparks_with_id = list(filter(lambda carpark: schema["carpark_id"] in carpark, carparks))
+    carpark_ids = list(map(lambda carpark: str(carpark[schema["carpark_id"]]), carparks_with_id))
     data = list(filter(lambda carpark: carpark["CarParkID"] in carpark_ids, all_carparks_availability() ))
     for datum in data:
         result[datum["CarParkID"]] = datum["AvailableLots"]
@@ -140,7 +141,7 @@ def cheapest_carparks_within_radius(data, center_location, radius, start_datetim
                 carpark[schema["lots"]] = -1
         except:
             carpark[schema["lots"]] = -1
-    sort_carparks(valid_data, schema)
+    sort_carparks(valid_data, schema, price_first=pricefirst)
     return valid_data
 
 def add_carparks_availability(data, schema):

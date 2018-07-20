@@ -6,9 +6,6 @@
 
 {% block style %}
     <style>
-        /* Always set the map height explicitly to define the size of the div
-            * element that contains the map. */
-
         .map-container {
             position: relative;
         }
@@ -25,10 +22,10 @@
             bottom: 0;
             right: 0;
             left: 0;
-            /* only for testing */
         }
 
         @media (min-width: 768px) {
+
             .map-container:before {
                 padding-top: 56.25%;
             }
@@ -43,13 +40,13 @@
                 content: '';
                 padding-top: 125%;
             }
-             #results {
+
+            #results {
                 position: absolute;
                 top: 0;
                 bottom: 0;
                 right: 0;
                 left: 0;
-                /* only for testing */
             }
         }
 
@@ -87,19 +84,21 @@
     #}
     <div class="form-row mt-3 justify-content-start">
         <div class="col-auto mt-2">
-            <span class="lead text-justify">From <span class="p-1 rounded border bg-light">{{ search_params["start"] }}</span> </span>
+            <span class="lead text-justify d-none d-md-block">From <span class="p-1 rounded border bg-light">{{ search_params.start }}</span> </span>
+            <span class="text-justify d-block d-md-none">From <span class="p-1 rounded border bg-light">{{ search_params.start }}</span> </span>
         </div>
         <div class="col-auto mt-2">
-            <span class="lead text-justify">to <span class="p-1 rounded border bg-light">{{ search_params["end"] }}</span> </span>
-        </div>
-        {% if results|length > 1 %}
-        <div class="col-auto mt-2 d-none d-sm-block">
-            <span class="lead text-justify">within <span class="p-1 rounded border bg-light">{{ search_params["radius"] }} m</span> </span>
+            <span class="lead text-justify d-none d-md-block">to <span class="p-1 rounded border bg-light">{{ search_params.end }}</span> </span>
+            <span class="text-justify d-block d-md-none">to <span class="p-1 rounded border bg-light">{{ search_params.end }}</span> </span>
         </div>
         <div class="col-auto mt-2 d-none d-sm-block">
-            <span class="lead text-justify">of <span class="p-1 rounded border bg-light">{{ search_params["place"] }}</span></span>
+            <span class="lead text-justify d-none d-md-block">within <span class="p-1 rounded border bg-light">{{ search_params.radius }} m</span> </span>
+            <span class="lead text-justify d-block d-md-none">within <span class="p-1 rounded border bg-light">{{ search_params.radius }} m</span> </span>
         </div>
-        {% endif %}
+        <div class="col-auto mt-2 d-none d-sm-block">
+            <span class="lead text-justify d-none d-md-block">of <span class="p-1 rounded border bg-light">{{ search_params.place }}</span></span>
+            <span class="lead text-justify d-block d-md-none">of <span class="p-1 rounded border bg-light">{{ search_params.place }}</span></span>
+        </div>
     </div>
     <div class="row mt-4">
         <div class="col-lg-8">
@@ -111,94 +110,91 @@
             </div>
         </div>
         <div class="col-lg-4" >
-        <div class="result-container">
-        <div id="results">
-        {% for result in results %}
-            <div class="col mb-3" id="card{{ loop.index }}">
-                {% if loop.index == 1 and result[schema['price']] != -1 %}
-                <div class="card border-success">
-                {% elif result[schema['price']] == -1 %}
-                <div class="card border-danger">
-                {% else %}
-                <div class="card">
-                {% endif %}
-                    <div class="card-body d-flex justify-content-between pb-2">
-                        <div>
-                            <h5 class="card-title">{{ result[schema["name"]] }}</h5>
-                            <h6 class="card-subtitle mb-2 text-muted">{{ result[schema["address"]] }}</h6>
+            <div class="result-container">
+                <div id="results">
+                {% for result in results %}
+                    <div class="col mb-3" id="card{{ loop.index }}">
+                        {% if loop.index == 1 and result[schema.price] != -1 %}
+                        <div class="card border-success">
+                        {% elif result[schema.price] == -1 %}
+                        <div class="card border-danger">
+                        {% else %}
+                        <div class="card">
+                        {% endif %}
+                            <div class="card-body d-flex justify-content-between pb-2">
+                                <div>
+                                    <h5 class="card-title">{{ result[schema.name] }}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">{{ result[schema.address] }}</h6>
+                                </div>
+                                <h1 class="text-muted">{{ loop.index }}</h1>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <div class="d-flex flex-column">
+                                        <span class="text-muted">Price</span>
+                                        {% if result[schema.price] != -1 %}
+                                        <span class="lead">${{ '%0.2f'| format(result[schema.price]/100) }}</span>
+                                        {% else %}
+                                        <span class="text-danger lead" >Closed</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="d-flex flex-column">
+                                        <span class="text-muted">Distance</span>
+                                        <span class="lead">{{ '%0.0f'| format(result[schema.distance]) }} m</span>
+                                    </div>
+                                    {% if result[schema.lots] != -1 %}
+                                    <div class="d-flex flex-column">
+                                        <span class="text-muted">Lots</span>
+                                        <span class="text-success lead">{{ result[schema.lots] }}</span>
+                                    </div>
+                                    {% endif %}
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <a href="{{ url_for('browse', id=result[schema.index]) }}" class="card-link text-info"><i class="fas fa-info-circle"></i> More Info</a>
+                                    <a href="https://www.google.com/maps/dir/?api=1&destination={{result[schema.location][0]}},{{result[schema.location][1]}}&travelmode=driving" class="card-link text-info"><i class='fas fa-location-arrow'></i> Get Directions</a>
+                                </li>
+                            </ul>
                         </div>
-                        <h1 class="text-muted">{{ loop.index }}</h1>
                     </div>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between">
-                            <div class="d-flex flex-column">
-                                <span class="text-muted">Price</span>
-                                {% if result[schema["price"]] != -1 %}
-                                    <span class="lead">${{ '%0.2f'| format(result[schema["price"]]/100) }}</span>
-                                {% else %}
-                                    <span class="text-danger lead" >Closed</span>
-                                {% endif %}
+                {% endfor %}
+                {% if results|length == 0 %}
+                    <div class="col mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">No results</h5>
+                                <h6 class="card-subtitle"><a href="{{ url_for('index') }}" class="text-info">Search again?</a></h6>
                             </div>
-                            <div class="d-flex flex-column">
-                                <span class="text-muted">Distance</span>
-                                <span class="lead">{{ '%0.0f'| format(result[schema["distance"]]) }} m</span>
-                            </div>
-                            {% if result[schema["lots"]] != -1 %}
-                            <div class="d-flex flex-column">
-                                <span class="text-muted">Lots</span>
-                                <span class="text-success lead">{{ result[schema["lots"]] }}</span>
-                            </div>
-                            {% endif %}
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <a href="{{ url_for('browse', id=result[schema['index']]) }}" class="card-link text-info">More Info</a>
-                            <a href="https://www.google.com/maps/dir/?api=1&destination={{result[schema['location']][0]}},{{result[schema['location']][1]}}&travelmode=driving" class="card-link text-info">Get Directions</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        {% endfor %}
-        {% if results|length == 0 %}
-            <div class="col mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">No results</h5>
-                        <h6 class="card-subtitle"><a href="{{ url_for('index') }}" class="text-info">Search again?</a></h6>
+                        </div>
+                    </div>
+                {% endif %}
+                    <div class="col mb-3">
+                        <span class="text-muted"><small>Price may not include GST.</small></span>
+                        <p class="text-muted"><small>Distance as the crow flies.</small></p>
                     </div>
                 </div>
             </div>
-        {% endif %}
-            <div class="col mb-3">
-                <span class="text-muted"><small>Price may not include GST.</small></span>
-                <p class="text-muted"><small>Distance as the crow flies.</small></p>
-            </div>
-        </div>
-        </div>
         </div>
     </div>
     <script>
     document.addEventListener('DOMContentLoaded', function () {
 
         // Initialize and add the map
-        // The location of center
-        var center = {lat: {{ search_params["center"][0] }}, lng: {{ search_params["center"][1] }}};
-        // The map, centered
-        var map = new google.maps.Map(document.getElementById('map')); // , {zoom: 15, center: center}
+        var center = {lat: {{ search_params.center[0] }}, lng: {{ search_params.center[1] }}};
+        var map = new google.maps.Map(document.getElementById('map')); // ,{zoom: 15, center: center} to center
 
         var markers = [];
 
         {% for result in results %}
-            var info = "{% if result[schema['price']] == -1 %}Closed{% else %}${{ '%0.2f'| format(result[schema['price']]/100) }}{% endif %} {{ '%0.0f'| format(result[schema['distance']]) }}m";
-            //console.log(info);
-            {% if loop.index == 1 and result[schema['price']] != -1 %}
-                var style = "shadow p-1 mb-1 bg-success text-light rounded";
-            {% elif result[schema['price']] == -1 %}
-                var style = "shadow p-1 mb-1 bg-danger text-light rounded";
+            var info = "{% if result[schema.price] == -1 %}Closed{% else %}${{ '%0.2f'| format(result[schema.price]/100) }}{% endif %} {{ '%0.0f'| format(result[schema.distance]) }}m";
+            {% if loop.index == 1 and result[schema.price] != -1 %}
+            var style = "shadow p-1 mb-1 bg-success text-light rounded";
+            {% elif result[schema.price] == -1 %}
+            var style = "shadow p-1 mb-1 bg-danger text-light rounded";
             {% else %}
-                var style = "shadow p-1 mb-1 bg-primary text-light rounded"
+            var style = "shadow p-1 mb-1 bg-primary text-light rounded"
             {% endif %}
             var marker = new MarkerWithLabel({
-                position: {lat: {{ result[schema["location"]][0] }}, lng: {{ result[schema["location"]][1]}} },
+                position: {lat: {{ result[schema.location][0] }}, lng: {{ result[schema.location][1]}} },
                 label: String({{loop.index}}),
                 animation: google.maps.Animation.DROP,
                 map: map,
@@ -207,12 +203,10 @@
                 labelClass: style, // the CSS class for the label
                 labelStyle: {opacity: 1.0}
             });
-
             marker.addListener('click', function() {
                 var element = document.getElementById("card{{ loop.index }}");
                 element.scrollIntoView({behavior: "smooth"});
             });
-
             markers.push(marker);
         {% endfor %}
 
@@ -220,6 +214,7 @@
         var marker = new google.maps.Marker({position: center, map: map});
         markers.push(marker);
 
+        // Fit map to markers
         var bound = new google.maps.LatLngBounds();
         for(var i in markers) {
             bound.extend(markers[i].getPosition());
@@ -227,8 +222,6 @@
         map.fitBounds(bound);
 
     }, false);
-
-
     </script>
 
 {% endblock %}

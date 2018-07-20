@@ -4,11 +4,8 @@
     Cheapest carparks around {{ search_params["place"] }} for {{ search_params["start_hr"] }} to {{ search_params["end_hr"] }} hours
 {% endblock %}
 
- {% block style %}
+{% block style %}
     <style>
-        /* Always set the map height explicitly to define the size of the div
-            * element that contains the map. */
-
         .map-container {
             position: relative;
         }
@@ -25,10 +22,10 @@
             bottom: 0;
             right: 0;
             left: 0;
-            /* only for testing */
         }
 
         @media (min-width: 768px) {
+
             .map-container:before {
                 padding-top: 56.25%;
             }
@@ -43,7 +40,8 @@
                 content: '';
                 padding-top: 125%;
             }
-             #results {
+
+            #results {
                 position: absolute;
                 top: 0;
                 bottom: 0;
@@ -72,16 +70,16 @@
 {% block main %}
     <div class="form-row mt-3 justify-content-start">
         <div class="col-auto mt-2">
-            <span class="lead text-justify">From <span class="p-1 rounded border bg-light">{{ search_params["start"] }}</span> </span>
+            <span class="lead text-justify">From <span class="p-1 rounded border bg-light">{{ search_params.start }}</span> </span>
         </div>
         <div class="col-auto mt-2 d-none d-sm-block">
-            <span class="lead text-justify">for <span class="p-1 rounded border bg-light">{{ search_params["start_hr"] }} to {{ search_params["end_hr"] }} hours</span></span>
+            <span class="lead text-justify">for <span class="p-1 rounded border bg-light">{{ search_params.start_hr }} to {{ search_params.end_hr }} hours</span></span>
         </div>
         <div class="col-auto mt-2 d-none d-sm-block">
-            <span class="lead text-justify">within <span class="p-1 rounded border bg-light">{{ search_params["radius"] }} m</span> </span>
+            <span class="lead text-justify">within <span class="p-1 rounded border bg-light">{{ search_params.radius }} m</span> </span>
         </div>
         <div class="col-auto mt-2 d-none d-sm-block">
-            <span class="lead text-justify">of <span class="p-1 rounded border bg-light">{{ search_params["place"] }}</span></span>
+            <span class="lead text-justify">of <span class="p-1 rounded border bg-light">{{ search_params.place }}</span></span>
         </div>
     </div>
     <div class="row mt-4">
@@ -98,43 +96,43 @@
         <div id="results">
         {% for result in results %}
             <div class="col mb-3" id="card{{ loop.index }}">
-                {% if result[schema['price']] == -1 %}
+                {% if result[schema.price] == -1 %}
                 <div class="card border-danger">
                 {% else %}
                 <div class="card">
                 {% endif %}
                     <div class="card-body d-flex justify-content-between pb-2">
                         <div>
-                            <h5 class="card-title">{{ result[schema["name"]] }}</h5>
-                            <h6 class="card-subtitle mb-2 text-muted">{{ result[schema["address"]] }}</h6>
+                            <h5 class="card-title">{{ result[schema.name] }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">{{ result[schema.address] }}</h6>
                         </div>
-                        <h1 class="text-muted">{{ search_params["start_hr"] + loop.index - 1 }}</h1>
+                        <h1 class="text-muted">{{ search_params.start_hr + loop.index - 1 }}</h1>
                         <span> hr</span>
                     </div>
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between">
                             <div class="d-flex flex-column">
                                 <span class="text-muted">Price</span>
-                                {% if result[schema["price"]] != -1 %}
-                                    <span class="lead">${{ '%0.2f'| format(result[schema["price"]]/100) }}</span>
+                                {% if result[schema.price] != -1 %}
+                                <span class="lead">${{ '%0.2f'| format(result[schema.price]/100) }}</span>
                                 {% else %}
-                                    <span class="text-danger lead" >Closed</span>
+                                <span class="text-danger lead" >Closed</span>
                                 {% endif %}
                             </div>
                             <div class="d-flex flex-column">
                                 <span class="text-muted">Distance</span>
-                                <span class="lead">{{ '%0.0f'| format(result[schema["distance"]]) }} m</span>
+                                <span class="lead">{{ '%0.0f'| format(result[schema.distance]) }} m</span>
                             </div>
-                            {% if result[schema["lots"]] != -1 %}
+                            {% if result[schema.lots] != -1 %}
                             <div class="d-flex flex-column">
                                 <span class="text-muted">Lots</span>
-                                <span class="text-success lead">{{ result[schema["lots"]] }}</span>
+                                <span class="text-success lead">{{ result[schema.lots] }}</span>
                             </div>
                             {% endif %}
                         </li>
                         <li class="list-group-item d-flex justify-content-between">
                             <a href="{{ url_for('browse', id=result[schema['index']]) }}" class="card-link text-info">More Info</a>
-                            <a href="https://www.google.com/maps/dir/?api=1&destination={{result[schema['location']][0]}},{{result[schema['location']][1]}}&travelmode=driving" class="card-link text-info">Get Directions</a>
+                            <a href="https://www.google.com/maps/dir/?api=1&destination={{result[schema.location][0]}},{{result[schema.location][1]}}&travelmode=driving" class="card-link text-info">Get Directions</a>
                         </li>
                     </ul>
                 </div>
@@ -146,12 +144,9 @@
     </div>
     <script>
         // Initialize and add the map
-        // The location of center
-        var center = {lat: {{ search_params["center"][0] }}, lng: {{ search_params["center"][1] }}};
-        // The map, centered
+        var center = {lat: {{ search_params.center[0] }}, lng: {{ search_params.center[1] }}};
         var map = new google.maps.Map(document.getElementById('map'), {zoom: 15, center: center});
-        // The marker, positioned at center
-        var marker = new google.maps.Marker({position: center, map: map});
+
         // markers structure [{location: {hours:<list>, index:<int>}]
         {% for marker in markers %}
             var info = {{ markers[marker]["hours"] }}.toString() + "hr";
@@ -172,6 +167,9 @@
                 element.scrollIntoView({behavior: "smooth"});
             });
         {% endfor %}
+
+        // The marker, positioned at center
+        var marker = new google.maps.Marker({position: center, map: map});
     </script>
 
 {% endblock %}
