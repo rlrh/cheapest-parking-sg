@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    About & Contact
+{% endblock %}
+{% block style %}
+{% endblock %}
+{% block navitems %}
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('index') }}">Find Cheapest</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('fuzzy') }}">Multi Cheapest</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('browse') }}">Browse All</a>
+    </li>
+    <li class="nav-item active">
+        <a class="nav-link" href="{{ url_for('browse') }}">About & Contact
+            <span class="sr-only">(current)</span>
+        </a>
+    </li>
+{% endblock %}
+
+{% block main %}
+<div class="row">
+    <div class="col-lg-6 mt-3">
+        <div class="row col">
+            <h3>Drop a message</h3>
+            <p>Want to report an error, contribute parking rates, give feedback or chat about anything else? Fill up this form or email <a href="mailto:carparkssg@gmail.com">carparkssg@gmail.com</a></p>
+        </div>
+        {% if sent is defined %}
+        <div class="row col">
+            {% if sent == 1 %}
+            <p class="lead text-success">Thank you! We'll get back to you soon.</p>
+            {% else %}
+            <p class="lead text-warning">Sorry! Error occurred while trying to send message - please try again later.</p>
+            {% endif %}
+        </div>
+        {% else %}
+        <form action="{{ url_for('contact') }}" method="post">
+          <div class="form-group">
+            <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="Your email address">
+            <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+          </div>
+          <div class="form-group">
+            {% if place is defined %}
+            <input type="text" class="form-control" id="subject" name="subject" placeholder="Subject"  value="Error - {{ place }} parking charges">
+            {% else %}
+            <input type="text" class="form-control" id="subject" name="subject" placeholder="Subject">
+            {% endif %}
+          </div>
+          <div class="form-group">
+            <textarea class="form-control" id="message" name="message" placeholder="Message" rows="5"></textarea>
+          </div>
+          <button type="submit" class="btn btn-success mb-3">Send</button>
+        </form>
+        {% endif %}
+    </div>
+    <div class="col-lg-6 mt-3">
+        <div class="row col">
+            <h3>About Carparks SG</h3>
+            <p class="text-justify">
+                Scratching your head trying to mentally calculate parking charges? Shocked at the price when you exit the carpark gantry? Trying to guesstimate where the cheapest carpark might be?
+            </p>
+            <p class="text-justify">
+                No more - Carparks SG helps you save money by taking the guesswork out of parking.
+            </p>
+                With Carparks SG, you can:
+            <ul>
+                <li>find the cheapest carparks for a given location and duration(s)</li>
+                <li>compare prices and distance from given location of the results</li>
+                <li>search for carparks around a location</li>
+                <li>see how much you're going to pay in advance</li>
+                <li>compare prices with nearby carparks</li>
+                <li>see parking rates and other information</li>
+                <li>see number of available lots in real-time where available</li>
+                <li>get directions to the carpark</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
