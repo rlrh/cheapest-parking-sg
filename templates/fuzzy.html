@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Fuzzy Cheapest - find cheapest carpark for range of durations
+    Find Cheapest Carparks for Multiple Durations
 {% endblock %}
 
 {% block style %}
@@ -38,12 +38,15 @@
         <a class="nav-link" href="{{ url_for('index') }}">Find Cheapest</a>
     </li>
     <li class="nav-item active">
-        <a class="nav-link" href="{{ url_for('fuzzy') }}">Fuzzy Cheapest
+        <a class="nav-link" href="{{ url_for('fuzzy') }}">Multi Cheapest
             <span class="sr-only">(current)</span>
         </a>
     </li>
     <li class="nav-item">
         <a class="nav-link" href="{{ url_for('browse') }}">Browse All</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('contact') }}">About & Contact</a>
     </li>
 {% endblock %}
 
@@ -51,13 +54,14 @@
         <form action="{{ url_for('fuzzy') }}" method="post">
                 <div class="row mt-4">
                     <div class="col">
-                        <h3>Don't know when you'll leave?</h3>
+                        <h3 class="d-none d-md-block">Don't know when you'll leave?</h3>
+                        <h4 class="d-block d-md-none">Don't know when you'll leave?</h4>
                         <p>Find the cheapest carpark for a range of durations.</p>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-lg-6">
-                        <div class="row mt-3">
+                        <div class="row mt-2">
                             <label for="center" class="col-2 lead">At</label>
                             <div class="col-10">
                                 <input class="form-control" type="text" placeholder="Search for a place or address" id="place" name="place" data-toggle="tooltip" data-placement="top" title="Search for a place or address here or drag the map marker">
@@ -126,7 +130,7 @@
                         </div>
                     </div>
                     <div class="col lg-6">
-                        <div class="map-container mt-3" data-toggle="tooltip" data-placement="top" title="">
+                        <div class="map-container mt-2" data-toggle="tooltip" data-placement="top" title="">
                             <div id="map"></div>
                         </div>
                     </div>
@@ -165,7 +169,7 @@
                         location: { latitude: {{ center[0] }}, longitude: {{ center[1] }} },
                         radius: 50,
                     {% else %}
-                        location: { latitude: 1.2864, longitude: 103.8531 }, // Fullerton/GPO
+                        location: { latitude: 1.286194, longitude: 103.853032 }, // Fullerton/GPO
                         radius: 500,
                     {% endif %}
                     inputBinding: {

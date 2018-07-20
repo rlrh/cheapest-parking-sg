@@ -4,13 +4,26 @@
     Errors
 {% endblock %}
 
+{% block navitems %}
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('index') }}">Find Cheapest</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('fuzzy') }}">Multi Cheapest</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('browse') }}">Browse All</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('browse') }}">About & Contact</a>
+    </li>
+{% endblock %}
+
 {% block main %}
     <div class="row pt-3">
         <h1>One or more errors ocurred.</h1>
     </div>
     {% for message in messages %}
-    <div class="row pt-3">
-        <pre>{{ message }}</pre>
-    </div>
+    <pre>{{ message }}</pre>
     {% endfor %}
 {% endblock %}

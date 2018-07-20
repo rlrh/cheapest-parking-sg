@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Cheapest carparks around {{ search_params["place"] }}
+    Cheapest Carparks Around {{ search_params["place"] }}
 {% endblock %}
 
 {% block style %}
@@ -61,10 +61,13 @@
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('fuzzy') }}">Fuzzy Cheapest</a>
+        <a class="nav-link" href="{{ url_for('fuzzy') }}">Multi Cheapest</a>
     </li>
     <li class="nav-item">
         <a class="nav-link" href="{{ url_for('browse') }}">Browse All</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('contact') }}">About & Contact</a>
     </li>
 {% endblock %}
 
@@ -106,7 +109,7 @@
                 <div id="map"></div>
             </div>
             <div class="row my-3">
-                <span class="col text-muted"><small>Press marker to quick jump to details.</small></span>
+                <small class="col text-muted">Press marker to quick jump to details.</small>
             </div>
         </div>
         <div class="col-lg-4" >

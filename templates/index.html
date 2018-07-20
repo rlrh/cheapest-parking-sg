@@ -1,8 +1,13 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Find Cheapest - calculates parking charges to find cheapest carparks
+    {% if name is defined %}
+    Cheapest Carparks Around {{name}}
+    {% else %}
+    Find Cheapest Carparks Around Singapore
+    {% endif %}
 {% endblock %}
+
 {% block style %}
 <style>
         .map-container {
@@ -43,10 +48,13 @@
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('fuzzy') }}">Fuzzy Cheapest</a>
+        <a class="nav-link" href="{{ url_for('fuzzy') }}">Multi Cheapest</a>
     </li>
     <li class="nav-item">
         <a class="nav-link" href="{{ url_for('browse') }}">Browse All</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('contact') }}">About & Contact</a>
     </li>
 {% endblock %}
 
@@ -55,20 +63,22 @@
                 <div class="row mt-4">
                     <div class="col">
                         {% if name is defined %}
-                        <h3>Find cheapest carparks around {{name}}</h3>
-                        <p class="d-none d-md-block">Compare parking charges of nearby carparks based on these parameters:</p>
+                        <h3 class="d-none d-md-block">Find cheapest carparks around {{name}}</h3>
+                        <h4 class="d-block d-md-none">Find cheapest carparks around {{name}}</h4>
+                        <p>Compare parking charges of nearby carparks to find the best price:</p>
                         {% else %}
-                        <h3>Find cheapest carparks</h3>
-                        <p class="d-none d-md-block">Compare parking charges of carparks all over Singapore to find the best price.</p>
+                        <h3 class="d-none d-md-block">Find cheapest carparks</h3>
+                        <h4 class="d-block d-md-none">Find cheapest carparks</h4>
+                        <p>Compare parking charges of carparks all over Singapore to find the best price:</p>
                         {% endif %}
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-lg-6">
                         {% if name is defined %}
-                        <div class="row mt-3 d-none">
+                        <div class="row mt-2 d-none">
                         {% else %}
-                        <div class="row mt-3">
+                        <div class="row mt-2">
                         {% endif %}
                             <label for="center" class="col-2 lead">At</label>
                             <div class="col-10">
@@ -82,7 +92,11 @@
                                 <input class="form-control" type="text" placeholder="longitude" id="lng" name="lng">
                             </div>
                         </div>
-                        <div class="row mt-3">
+                        {% if name is defined %}
+                        <div class="row mt-3" id="within_row">
+                        {% else %}
+                        <div class="row mt-3 d-none" id="within_row">
+                        {% endif %}
                             <label for="radius" class="col-2 lead">Within</label>
                             <div class="col-10 input-group">
                                 <input class="form-control" type="number" min="0" max="5000" value="500" list="common_radii" id="radius" name="radius" data-toggle="tooltip" data-placement="top" title="Search radius (0-5000m)" />
@@ -117,11 +131,11 @@
                             </div>
                         </div>
                         {% if name is defined %}
-                        <div class="row mt-3 d-none">
+                        <div class="row mt-3 d-none" id="sort_row">
                         {% else %}
-                        <div class="row mt-3">
+                        <div class="row mt-3 d-none" id="sort_row">
                         {% endif %}
-                            <label for="radio1" class="col-2 lead">Sort by</label>
+                            <label for="radio1" class="col-2 lead" style="line-height: 1.25;">Sort by</label>
                             <div class="col-10">
                                 <div class="row">
                                     <div class="col-sm-6 input-group custom-control custom-radio">
@@ -135,14 +149,19 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row my-3">
-                            <div class="col text-center">
-                                <input type="submit" class="btn btn-success btn-block" value="Find Cheapest Carparks">
+                        <div class="form-row my-3 align-items-center">
+                            <div class="col">
+                                <input type="submit" class="btn btn-success btn-block" value="Find Carparks">
                             </div>
+                            {% if name is not defined %}
+                            <div class="col-auto text-center">
+                                <button type="button" id="options_toggle" class="btn btn-secondary btn-sm text-info"><i class='fas fa-caret-down'></i> More Options</button>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="col lg-6">
-                        <div class="map-container mt-3" data-toggle="tooltip" data-placement="top" title="">
+                        <div class="map-container mt-2" data-toggle="tooltip" data-placement="top" title="">
                             <div id="map"></div>
                         </div>
                     </div>
@@ -167,7 +186,7 @@
                             enableTime: true,
                             dateFormat: "Y-m-dTH:i",
                             altInput: true,
-                            altFormat: "D, j F Y, h:i K",
+                            altFormat: "D, j M Y, h:i K",
                             defaultDate: "today",
                             minDate: "today",
                             onChange: function (selectedDates, dateStr, instance) {
@@ -183,7 +202,7 @@
                             enableTime: true,
                             dateFormat: "Y-m-dTH:i",
                             altInput: true,
-                            altFormat: "D, j F Y, h:i K",
+                            altFormat: "D, j M Y, h:i K",
                             defaultDate: "today",
                             minDate: "today",
                             onChange: function (selectedDates, dateStr, instance) {
@@ -200,7 +219,7 @@
                             enableTime: true,
                             dateFormat: "Y-m-dTH:i",
                             altInput: true,
-                            altFormat: "D, j F Y, h:i K",
+                            altFormat: "D, j M Y, h:i K",
                             defaultDate: "today",
                             minDate: "today",
                             onChange: function (selectedDates, dateStr, instance) {
@@ -215,7 +234,7 @@
                             enableTime: true,
                             dateFormat: "Y-m-dTH:i",
                             altInput: true,
-                            altFormat: "D, j F Y, h:i K",
+                            altFormat: "D, j M Y, h:i K",
                             defaultDate: "today",
                             minDate: "today",
                             onChange: function (selectedDates, dateStr, instance) {
@@ -234,6 +253,28 @@
                     var rounded_date = new Date(Math.ceil(date.getTime() / coeff) * coeff);
                     startPicker.setDate(rounded_date, false);
                     endPicker.setDate(new Date(startPicker.selectedDates[0].getTime() + time_diff*60000), false);
+
+                    {% if name is not defined %}
+                    var within_row = document.getElementById("within_row");
+                    var sort_row = document.getElementById("sort_row");
+                    var options_toggle = document.getElementById("options_toggle");
+                    options_toggle.addEventListener('click', function() {
+                        within_row.classList.toggle("d-none");
+                        sort_row.classList.toggle("d-none");
+
+                        if (options_toggle.innerHTML == "<i class=\"fas fa-caret-down\"></i> More Options"){
+                            options_toggle.innerHTML = "<i class=\"fas fa-caret-up\"></i> Less Options";
+                        } else {
+                            options_toggle.innerHTML = "<i class=\"fas fa-caret-down\"></i> More Options";
+                        }
+
+                    });
+                    var media_query = window.matchMedia("(min-width: 768px)");
+                    if (media_query.matches) {
+                        options_toggle.click();
+                    }
+                    {% endif %}
+
                 }, false);
 
                 var marker_locations = {{ markers }}.map(function(location) { return {lat: location[0], lng: location[1] } })
@@ -247,6 +288,7 @@
                         location: { latitude: 1.286194, longitude: 103.853032 }, // Fullerton/GPO
                     {% endif %}
                     radius: 500,
+                    mapOptions: {clickableIcons: false},
                     inputBinding: {
                         latitudeInput: $('#lat'),
                         longitudeInput: $('#lng'),
@@ -264,7 +306,7 @@
                                 label: "P"
                             });
                         });
-                        var markerCluster = new MarkerClusterer(mapContext, markers, {maxZoom: 14, imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+                        var markerCluster = new MarkerClusterer(mapContext, markers, {maxZoom: 15, imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
                     }
                 });
             </script>

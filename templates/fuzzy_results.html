@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Cheapest carparks around {{ search_params["place"] }} for {{ search_params["start_hr"] }} to {{ search_params["end_hr"] }} hours
+    Cheapest Carparks Around {{ search_params["place"] }} for {{ search_params["start_hr"] }} to {{ search_params["end_hr"] }} Hours
 {% endblock %}
 
 {% block style %}
@@ -58,28 +58,35 @@
         <a class="nav-link" href="{{ url_for('index') }}">Find Cheapest</a>
     </li>
     <li class="nav-item active">
-        <a class="nav-link" href="{{ url_for('fuzzy') }}">Fuzzy Cheapest
+        <a class="nav-link" href="{{ url_for('fuzzy') }}">Multi Cheapest
             <span class="sr-only">(current)</span>
         </a>
     </li>
     <li class="nav-item">
         <a class="nav-link" href="{{ url_for('browse') }}">Browse All</a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('contact') }}">About & Contact</a>
+    </li>
 {% endblock %}
 
 {% block main %}
     <div class="form-row mt-3 justify-content-start">
         <div class="col-auto mt-2">
-            <span class="lead text-justify">From <span class="p-1 rounded border bg-light">{{ search_params.start }}</span> </span>
+            <span class="lead text-justify d-none d-md-block">From <span class="p-1 rounded border bg-light">{{ search_params.start }}</span> </span>
+            <span class="text-justify d-block d-md-none">From <span class="p-1 rounded border bg-light">{{ search_params.start }}</span> </span>
         </div>
         <div class="col-auto mt-2 d-none d-sm-block">
-            <span class="lead text-justify">for <span class="p-1 rounded border bg-light">{{ search_params.start_hr }} to {{ search_params.end_hr }} hours</span></span>
+            <span class="lead text-justify d-none d-md-block">for <span class="p-1 rounded border bg-light">{{ search_params.start_hr }} to {{ search_params.end_hr }} hours</span></span>
+            <span class="text-justify d-block d-md-none">for <span class="p-1 rounded border bg-light">{{ search_params.start_hr }} to {{ search_params.end_hr }} hours</span></span>
         </div>
         <div class="col-auto mt-2 d-none d-sm-block">
-            <span class="lead text-justify">within <span class="p-1 rounded border bg-light">{{ search_params.radius }} m</span> </span>
+            <span class="lead text-justify d-none d-md-block">within <span class="p-1 rounded border bg-light">{{ search_params.radius }} m</span> </span>
+            <span class="text-justify d-block d-md-none">within <span class="p-1 rounded border bg-light">{{ search_params.radius }} m</span> </span>
         </div>
         <div class="col-auto mt-2 d-none d-sm-block">
-            <span class="lead text-justify">of <span class="p-1 rounded border bg-light">{{ search_params.place }}</span></span>
+            <span class="lead text-justify d-none d-md-block">of <span class="p-1 rounded border bg-light">{{ search_params.place }}</span></span>
+            <span class="text-justify d-block d-md-none">of <span class="p-1 rounded border bg-light">{{ search_params.place }}</span></span>
         </div>
     </div>
     <div class="row mt-4">
@@ -88,7 +95,7 @@
                 <div id="map"></div>
             </div>
             <div class="row my-3">
-                <span class="col text-muted"><small>Press marker to quick jump to details.</small></span>
+                <small class="col text-muted">Press marker to quick jump to details.</small>
             </div>
         </div>
         <div class="col-lg-4" >
@@ -131,8 +138,8 @@
                             {% endif %}
                         </li>
                         <li class="list-group-item d-flex justify-content-between">
-                            <a href="{{ url_for('browse', id=result[schema['index']]) }}" class="card-link text-info">More Info</a>
-                            <a href="https://www.google.com/maps/dir/?api=1&destination={{result[schema.location][0]}},{{result[schema.location][1]}}&travelmode=driving" class="card-link text-info">Get Directions</a>
+                            <a href="{{ url_for('browse', id=result[schema['index']]) }}" class="card-link text-info"><i class="fas fa-info-circle"></i> More Info</a>
+                            <a href="https://www.google.com/maps/dir/?api=1&destination={{result[schema.location][0]}},{{result[schema.location][1]}}&travelmode=driving" class="card-link text-info"><i class='fas fa-location-arrow'></i> Get Directions</a>
                         </li>
                     </ul>
                 </div>
