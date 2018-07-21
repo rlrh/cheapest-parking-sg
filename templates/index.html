@@ -107,7 +107,7 @@
                         {% endif %}
                             <label for="radius" class="col-2 lead">Within</label>
                             <div class="col-10 input-group">
-                                <input class="form-control" type="number" min="0" max="5000" value="500" list="common_radii" id="radius" name="radius" data-toggle="tooltip" data-placement="top" title="Search radius (0-5000m)" />
+                                <input class="form-control" type="number" min="0" max="2000" value="500" list="common_radii" id="radius" name="radius" data-toggle="tooltip" data-placement="top" title="Search radius (0-2000m)" />
                                 <datalist id="common_radii">
                                     <option value="0">
                                     <option value="200">
@@ -123,15 +123,13 @@
                         <div class="row mt-3">
                             <label for="start" class="col-2 lead">From</label>
                             <div class="col-10" data-toggle="tooltip" data-placement="top" title="Start date & time">
-                                <input id="start" name="start" class="flatpickr flatpickr-input form-control" placeholder="Select start date and time.."
-                                    type="text" readonly="readonly" data-toggle="tooltip" data-placement="top" title="Start date & time">
+                                <input id="start" name="start" class="flatpickr flatpickr-input form-control" placeholder="Select start date and time.." type="text" readonly="readonly">
                             </div>
                         </div>
                         <div class="row mt-3">
                             <label for="end" class="col-2 lead">To</label>
                             <div class="col-10" data-toggle="tooltip" data-placement="top" title="End date & time">
-                                <input id="end" name="end" class="flatpickr flatpickr-input form-control mb-2" placeholder="Select end date and time.." type="text"
-                                    readonly="readonly" data-toggle="tooltip" data-placement="top" title="End date & time">
+                                <input id="end" name="end" class="flatpickr flatpickr-input form-control mb-2" placeholder="Select end date and time.." type="text" readonly="readonly">
                                 {% if name is not defined %}
                                 <span>Don't know what time you'll leave?</span></br>
                                 <a class="text-info" href="{{ url_for('fuzzy') }}">Find the cheapest carpark for a range of durations here.</a>

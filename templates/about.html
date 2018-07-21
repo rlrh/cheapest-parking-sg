@@ -45,18 +45,18 @@
         {% else %}
         <form action="{{ url_for('contact') }}" method="post">
           <div class="form-group">
-            <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="Your email address">
+            <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="Your email address" required>
             <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
           </div>
           <div class="form-group">
             {% if place is defined %}
-            <input type="text" class="form-control" id="subject" name="subject" placeholder="Subject"  value="Error - {{ place }} parking charges">
+            <input type="text" class="form-control" id="subject" name="subject" placeholder="Subject" value="Error - {{ place }} parking rates" required>
             {% else %}
-            <input type="text" class="form-control" id="subject" name="subject" placeholder="Subject">
+            <input type="text" class="form-control" id="subject" name="subject" placeholder="Subject" required>
             {% endif %}
           </div>
           <div class="form-group">
-            <textarea class="form-control" id="message" name="message" placeholder="Message" rows="5"></textarea>
+            <textarea class="form-control" id="message" name="message" placeholder="Message" rows="5" required></textarea>
           </div>
           <button type="submit" class="btn btn-success mb-3">Send</button>
         </form>

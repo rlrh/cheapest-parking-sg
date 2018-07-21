@@ -15,8 +15,8 @@ app.config["DEBUG"] = True
 
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'carparkssg@gmail.com'
-app.config['MAIL_PASSWORD'] = '$tGabriel6'
+app.config['MAIL_USERNAME'] = ''
+app.config['MAIL_PASSWORD'] = ''
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
@@ -40,6 +40,8 @@ def index():
             messages.append(str(e))
         try:
             to_datetime = datetime.strptime(request.form["end"], "%Y-%m-%dT%H:%M")
+            if to_datetime < from_datetime:
+                raise Exception("End datetime earlier than start datetime.")
         except Exception as e:
             messages.append("End datetime invalid.")
             messages.append(str(e))
@@ -52,6 +54,8 @@ def index():
             messages.append(str(e))
         try:
             radius = int(request.form["radius"])
+            if radius > 2000:
+                raise Exception("Radius too big.")
         except Exception as e:
             messages.append("Radius invalid.")
             messages.append(str(e))
@@ -113,7 +117,7 @@ def cheapest():
     except Exception as e:
         messages.append("Error ocurred while searching for carparks. " + str(e))
 
-    search_params = {"start": from_datetime.strftime("%a, %-d %B %Y, %-I:%M %p"), "end": to_datetime.strftime("%a, %-d %B %Y, %-I:%M %p"), "center": center_loc, "radius": radius, "place":place}
+    search_params = {"start": from_datetime.strftime("%a, %-d %b %Y, %-I:%M %p"), "end": to_datetime.strftime("%a, %-d %b %Y, %-I:%M %p"), "center": center_loc, "radius": radius, "place":place}
 
     if not messages:
         return render_template("results.html", search_params=search_params, results=cheapest_carparks, schema=schema)

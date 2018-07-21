@@ -237,7 +237,7 @@
                         contentString += "<strong class='text-primary'>Remarks</strong><p class='text-muted'>" + carpark[schema.remarks] + "</p>"
                     }
 
-                    var report_link = encodeURI("{{ url_for('contact', place=carpark_name) }}" + String(carpark[schema.name]))
+                    var report_link = "{{ url_for('contact', place=carpark_name) }}" + String(carpark[schema.name])
                     contentString += "<div class='d-flex justify-content-between'>\
                                         <small class='text-muted'>Updated " + carpark[schema.updated] + "</small>\
                                         <small><a class='card-link text-info' href='" + encodeURI(report_link) + "' id='compare'><i class='fas fa-exclamation-circle'></i> Report Error</a></small>\

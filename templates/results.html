@@ -100,11 +100,11 @@
         </div>
         <div class="col-auto mt-2 d-none d-sm-block">
             <span class="lead text-justify d-none d-md-block">within <span class="p-1 rounded border bg-light">{{ search_params.radius }} m</span> </span>
-            <span class="lead text-justify d-block d-md-none">within <span class="p-1 rounded border bg-light">{{ search_params.radius }} m</span> </span>
+            <span class="text-justify d-block d-md-none">within <span class="p-1 rounded border bg-light">{{ search_params.radius }} m</span> </span>
         </div>
         <div class="col-auto mt-2 d-none d-sm-block">
             <span class="lead text-justify d-none d-md-block">of <span class="p-1 rounded border bg-light">{{ search_params.place }}</span></span>
-            <span class="lead text-justify d-block d-md-none">of <span class="p-1 rounded border bg-light">{{ search_params.place }}</span></span>
+            <span class="text-justify d-block d-md-none">of <span class="p-1 rounded border bg-light">{{ search_params.place }}</span></span>
         </div>
     </div>
     <div class="row mt-4">
@@ -138,7 +138,7 @@
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item d-flex justify-content-between">
                                     <div class="d-flex flex-column">
-                                        <span class="text-muted">Price</span>
+                                        <span>Price</span>
                                         {% if result[schema.price] != -1 %}
                                         <span class="lead">${{ '%0.2f'| format(result[schema.price]/100) }}</span>
                                         {% else %}
@@ -146,16 +146,22 @@
                                         {% endif %}
                                     </div>
                                     <div class="d-flex flex-column">
-                                        <span class="text-muted">Distance</span>
+                                        <span>Distance</span>
                                         <span class="lead">{{ '%0.0f'| format(result[schema.distance]) }} m</span>
                                     </div>
                                     {% if result[schema.lots] != -1 %}
                                     <div class="d-flex flex-column">
-                                        <span class="text-muted">Lots</span>
+                                        <span>Lots</span>
                                         <span class="text-success lead">{{ result[schema.lots] }}</span>
                                     </div>
                                     {% endif %}
                                 </li>
+                                {% if result[schema.remarks] is defined %}
+                                <li class="list-group-item d-flex flex-column">
+                                    <small>Not calculated</small>
+                                    <span class="text-justify">{{ result[schema.remarks] }}</span>
+                                </li>
+                                {% endif %}
                                 <li class="list-group-item d-flex justify-content-between">
                                     <a href="{{ url_for('browse', id=result[schema.index]) }}" class="card-link text-info"><i class="fas fa-info-circle"></i> More Info</a>
                                     <a href="https://www.google.com/maps/dir/?api=1&destination={{result[schema.location][0]}},{{result[schema.location][1]}}&travelmode=driving" class="card-link text-info"><i class='fas fa-location-arrow'></i> Get Directions</a>
