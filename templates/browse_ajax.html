@@ -6,6 +6,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+    {% if name is defined %}
+    <title>{{name}} Parking Charges Calculator - Carparks SG</title>
+    <meta name="description" content="Calculate parking charges for {{name}} automatically, compare prices with nearby carparks, see parking rates, real-time lot availability and other info." />
+    {% else %}
+    <title>Browse All Carparks & Calculate Parking Charges - Carparks SG</title>
+    <meta name="description" content="Search for the cheapest carparks around Singapore. Calculate parking charges automatically and see parking rates, real-time lot availability & other info." />
+    {% endif %}
+    <meta name="robots" content="index, follow" />
+
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.1.1/lux/bootstrap.min.css" rel="stylesheet" integrity="sha384-4KIc2mnKfAA7VjirNLk2Sqp7jxFNq1q8+FhYGxhW2l52lt4HJsfksL+hjswHfbl/"
         crossorigin="anonymous">
@@ -27,12 +36,6 @@
     <!-- Flatpickr Datetime Picker -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-    {% if name is defined %}
-    <title>Carparks SG: {{name}} Parking Charges Calculator</title>
-    {% else %}
-    <title>Carparks SG: Browse All Carparks & Calculate Parking Charges</title>
-    {% endif %}
 
     <style>
         html,
@@ -131,6 +134,8 @@
                     position: google.maps.ControlPosition.BOTTOM_LEFT
                 },
             });
+
+
             var markers = [];
             var info = new google.maps.InfoWindow();
             var place_marker = new google.maps.Marker({
@@ -140,6 +145,19 @@
             });
             var autocomplete = new google.maps.places.Autocomplete(document.getElementById('place'));
             autocomplete.setComponentRestrictions({ 'country': 'sg' });
+
+            // Try HTML5 geolocation.
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var pos = {
+                      lat: position.coords.latitude,
+                      lng: position.coords.longitude
+                    };
+                    map.setCenter(pos);
+                    map.setZoom(14);
+                    place_marker.setPosition(pos);
+                });
+            }
 
             // event listeners
             map.addListener('click', function () {
@@ -194,7 +212,7 @@
                         contentString += "<p class='text-success'>" + carpark[schema.lots] + " lots now</p>";
                     }
                     var directions_link = "https://www.google.com/maps/dir/?api=1&destination=" + carpark[schema.location][0] + "," + carpark[schema.location][1] + "&travelmode=driving";
-                    contentString += "<p><a class='card-link text-info' href='" + directions_link + "' ><i class='fas fa-location-arrow'></i> Get Directions</a></p>";
+                    contentString += "<p><a class='card-link text-info' href='" + encodeURI(directions_link) + "' ><i class='fas fa-location-arrow'></i> Get Directions</a></p>";
                     contentString += "</div>";
                     var compare_link = "{{ url_for('index', id=index) }}" + String(index);
                     contentString += "<strong class='text-primary'>Calculate Parking Charges</strong>\
@@ -208,7 +226,7 @@
                                     </div>\
                                     <div class='d-flex justify-content-between'>\
                                         <h5 class='card-title mt-2 mb-3' id='price' data-carparkindex=' " + index + " '>Loading...</h6>\
-                                        <a class='card-link text-info mt-2' href='" + compare_link + "' id='compare'><i class='fas fa-list-ol'></i> Compare Nearby</a>\
+                                        <a class='card-link text-info mt-2' href='" + encodeURI(compare_link) + "' id='compare'><i class='fas fa-list-ol'></i> Compare Nearby</a>\
                                     </div>"
                     carpark[schema.human_rates].forEach(function (rate) {
                         temp = "<strong class='text-primary'>" + rate[schema.human_interval] + "</strong>\
@@ -218,6 +236,13 @@
                     if (typeof carpark[schema.remarks] !== 'undefined') {
                         contentString += "<strong class='text-primary'>Remarks</strong><p class='text-muted'>" + carpark[schema.remarks] + "</p>"
                     }
+
+                    var report_link = encodeURI("{{ url_for('contact', place=carpark_name) }}" + String(carpark[schema.name]))
+                    contentString += "<div class='d-flex justify-content-between'>\
+                                        <small class='text-muted'>Updated " + carpark[schema.updated] + "</small>\
+                                        <small><a class='card-link text-info' href='" + encodeURI(report_link) + "' id='compare'><i class='fas fa-exclamation-circle'></i> Report Error</a></small>\
+                                    </div>"
+
                     contentString += "</div>";
 
                     // set info window's content

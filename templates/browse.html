@@ -6,6 +6,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+    {% if name is defined %}
+    <title>Carparks SG: {{name}} Parking Charges Calculator</title>
+    <meta name="description" content="Calculate parking charges for {{name}} automatically, compare prices with nearby carparks, see parking rates, real-time lot availability and other info." />
+    {% else %}
+    <title>Carparks SG: Browse All Carparks & Calculate Parking Charges</title>
+    <meta name="description" content="Search for the cheapest carparks around Singapore. Calculate parking charges automatically and see parking rates, real-time lot availability & other info." />
+    {% endif %}
+    <meta name="robots" content="index, follow" />
+
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.1.1/lux/bootstrap.min.css" rel="stylesheet" integrity="sha384-4KIc2mnKfAA7VjirNLk2Sqp7jxFNq1q8+FhYGxhW2l52lt4HJsfksL+hjswHfbl/" crossorigin="anonymous">
 
@@ -29,12 +38,6 @@
     <![endif]-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-    {% if name is defined %}
-    <title>Carparks SG: {{name}} Parking Charges Calculator</title>
-    {% else %}
-    <title>Carparks SG: Browse All Carparks & Calculate Parking Charges</title>
-    {% endif %}
 
     <style>
         html,

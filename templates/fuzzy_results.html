@@ -1,7 +1,11 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Cheapest Carparks Around {{ search_params["place"] }} for {{ search_params["start_hr"] }} to {{ search_params["end_hr"] }} Hours
+    Cheapest Carparks Around {{ search_params.place }} for {{ search_params.start_hr }} to {{ search_params.end_hr }} Hours
+{% endblock %}
+
+{% block desc %}
+    Cheapest carparks within {{ search_params.radius }} m of {{ search_params.place }} from {{ search_params.start_hr }} to {{ search_params.end_hr }} Hours
 {% endblock %}
 
 {% block style %}
@@ -113,8 +117,10 @@
                             <h5 class="card-title">{{ result[schema.name] }}</h5>
                             <h6 class="card-subtitle mb-2 text-muted">{{ result[schema.address] }}</h6>
                         </div>
-                        <h1 class="text-muted">{{ search_params.start_hr + loop.index - 1 }}</h1>
-                        <span> hr</span>
+                        <div class="d-flex justify-content-between">
+                            <h1 class="text-muted">{{ search_params.start_hr + loop.index - 1 }}</h1>
+                            <small> HR</small>
+                        </div>
                     </div>
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between">

@@ -1,7 +1,11 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Cheapest Carparks Around {{ search_params["place"] }}
+    Cheapest Carparks Around {{ search_params.place }}
+{% endblock %}
+
+{% block desc %}
+    Cheapest carparks within {{ search_params.radius }} m of {{ search_params.place }} from {{ search_params.start }} to {{ search_params.end }}
 {% endblock %}
 
 {% block style %}

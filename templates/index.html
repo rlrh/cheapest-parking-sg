@@ -8,6 +8,14 @@
     {% endif %}
 {% endblock %}
 
+{% block desc %}
+    {% if name is defined %}
+    Compare parking charges of carparks around {{name}} to find the best price. Calculate parking charges automatically and see parking rates, real-time lot availability & other info.
+    {% else %}
+    Compare parking charges of carparks all over Singapore to find the best price. Calculate parking charges automatically and see parking rates, real-time lot availability & other info.
+    {% endif %}
+{% endblock %}
+
 {% block style %}
 <style>
         .map-container {

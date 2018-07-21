@@ -4,6 +4,10 @@
     Find Cheapest Carparks for Multiple Durations
 {% endblock %}
 
+{% block desc %}
+    Find the cheapest carpark for a range of durations so you get the best price no matter how long you stay. Calculate parking charges automatically and see parking rates, real-time lot availability & other info.
+{% endblock %}
+
 {% block style %}
     <style>
         .map-container {
@@ -54,9 +58,9 @@
         <form action="{{ url_for('fuzzy') }}" method="post">
                 <div class="row mt-4">
                     <div class="col">
-                        <h3 class="d-none d-md-block">Don't know when you'll leave?</h3>
-                        <h4 class="d-block d-md-none">Don't know when you'll leave?</h4>
-                        <p>Find the cheapest carpark for a range of durations.</p>
+                        <h3 class="d-none d-md-block">Get the best price no matter how long you stay</h3>
+                        <h4 class="d-block d-md-none">Get the best price no matter how long you stay</h4>
+                        <p>Find the cheapest carparks for a range of durations:</p>
                     </div>
                 </div>
                 <div class="row">
@@ -111,11 +115,11 @@
                             <div class="col-10">
                                 <div class="row">
                                     <div class="col input-group">
-                                        <input class="form-control" type="number" min="1" max="8" value="1" placeholder="Minimum" id="start_hr" name="start_hr"  data-toggle="tooltip" data-placement="top" title="Min. hours (1-8) here">
+                                        <input class="form-control" type="number" min="1" max="12" value="1" placeholder="Minimum" id="start_hr" name="start_hr"  data-toggle="tooltip" data-placement="top" title="Min. hours (1-12) staying here">
                                         <div class="input-group-append">
                                             <div class="input-group-text">to</div>
                                         </div>
-                                        <input class="form-control" type="number" min="1" max="8" value="4" placeholder="Maximum" id="end_hr" name="end_hr"  data-toggle="tooltip" data-placement="top" title="Max. hours (1-8) here">
+                                        <input class="form-control" type="number" min="1" max="12" value="4" placeholder="Maximum" id="end_hr" name="end_hr"  data-toggle="tooltip" data-placement="top" title="Max. hours (1-12) staying here">
                                         <div class="input-group-append">
                                             <div class="input-group-text d-none d-sm-block">hours</div>
                                         </div>
@@ -125,7 +129,7 @@
                         </div>
                         <div class="row my-3">
                             <div class="col text-center">
-                                <input type="submit" class="btn btn-success btn-block" value="Search">
+                                <input type="submit" class="btn btn-success btn-block" value="Find Carparks">
                             </div>
                         </div>
                     </div>
