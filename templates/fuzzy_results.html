@@ -143,6 +143,12 @@
                             </div>
                             {% endif %}
                         </li>
+                        {% if result[schema.remarks] is defined %}
+                        <li class="list-group-item d-flex flex-column">
+                            <small>Not calculated</small>
+                            <span class="text-justify">{{ result[schema.remarks] }}</span>
+                        </li>
+                        {% endif %}
                         <li class="list-group-item d-flex justify-content-between">
                             <a href="{{ url_for('browse', id=result[schema['index']]) }}" class="card-link text-info"><i class="fas fa-info-circle"></i> More Info</a>
                             <a href="https://www.google.com/maps/dir/?api=1&destination={{result[schema.location][0]}},{{result[schema.location][1]}}&travelmode=driving" class="card-link text-info"><i class='fas fa-location-arrow'></i> Get Directions</a>
@@ -159,6 +165,12 @@
         // Initialize and add the map
         var center = {lat: {{ search_params.center[0] }}, lng: {{ search_params.center[1] }}};
         var map = new google.maps.Map(document.getElementById('map'), {zoom: 15, center: center});
+
+        var markers = [];
+
+        // The marker, positioned at center
+        var marker = new google.maps.Marker({position: center, map: map});
+        markers.push(marker);
 
         // markers structure [{location: {hours:<list>, index:<int>}]
         {% for marker in markers %}
@@ -179,10 +191,16 @@
                 var element = document.getElementById("card{{ markers[marker]['index'] }}");
                 element.scrollIntoView({behavior: "smooth"});
             });
+
+            markers.push(marker);
         {% endfor %}
 
-        // The marker, positioned at center
-        var marker = new google.maps.Marker({position: center, map: map});
+        // Fit map to markers
+        var bound = new google.maps.LatLngBounds();
+        for(var i in markers) {
+            bound.extend(markers[i].getPosition());
+        }
+        map.fitBounds(bound);
     </script>
 
 {% endblock %}

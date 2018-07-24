@@ -7,16 +7,16 @@ from copy import deepcopy
 from helpers import *
 from flask_mail import Mail, Message
 
-data_file = "data-lta-orchard-minified.json"
+data_file = "data-lta-orchard-cbd-minified.json"
 data_schema_file = "data-schema.json"
 
 app = Flask(__name__)
-app.config["DEBUG"] = True
+#app.config["DEBUG"] = True
 
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = ''
-app.config['MAIL_PASSWORD'] = ''
+app.config['MAIL_USERNAME'] = 'sender.carparkssg@gmail.com'
+app.config['MAIL_PASSWORD'] = 'sgparkscar'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
@@ -67,7 +67,7 @@ def index():
         try:
             cheapest_carparks = cheapest_carparks_within_radius(data, center_loc, radius, from_datetime, to_datetime, schema, pricefirst=radio)
         except Exception as e:
-            messages.append("Error ocurred while searching for carparks")
+            messages.append("Error ocurred while searching for carparks.")
             messages.append(str(e))
 
         search_params = {"start": from_datetime.strftime("%a, %-d %b %Y, %-I:%M %p"), "end": to_datetime.strftime("%a, %-d %b %Y, %-I:%M %p"), "center": center_loc, "radius": radius, "place":request.form["place"]}
@@ -86,7 +86,7 @@ def index():
         else:
             return render_template("index.html", markers=markers, schema=schema)
 
-@app.route('/cheapest')
+@app.route('/find')
 def cheapest():
     messages = []
     try:
@@ -95,32 +95,44 @@ def cheapest():
         messages.append("Start datetime invalid. " + str(e))
     try:
         to_datetime = datetime.strptime(request.args["end"], "%Y-%m-%dT%H:%M")
+        if to_datetime < from_datetime:
+                raise Exception("End datetime earlier than start datetime.")
     except Exception as e:
         messages.append("End datetime invalid. " + str(e))
-        messages.append(str(e))
     try:
         lat = float(request.args["lat"])
         lng = float(request.args["lng"])
         center_loc = [lat, lng]
     except Exception as e:
-        messages.append("lat and lng invalid. " + str(e))
+        messages.append("Lat and lng invalid. " + str(e))
     try:
-        radius = int(request.args["radius"])
+        try:
+            radius = int(request.args.get("radius", 500))
+        except:
+            radius = 500
+        if radius > 2000:
+            raise Exception("Radius too big.")
     except Exception as e:
         messages.append("Radius invalid. " + str(e))
     try:
-        place = request.args["place"]
+        radio = bool(int(request.form.get("pricefirst", 1)))
     except Exception as e:
-        messages.append("Radius invalid. " + str(e))
+        messages.append("Sorting method invalid.")
+        messages.append(str(e))
     try:
-        cheapest_carparks = cheapest_carparks_within_radius(data, center_loc, radius, from_datetime, to_datetime, schema)
+        place = request.args.get("place", "")
+    except Exception as e:
+        messages.append("Place invalid. " + str(e))
+    try:
+        cheapest_carparks = cheapest_carparks_within_radius(data, center_loc, radius, from_datetime, to_datetime, schema, pricefirst=radio)
     except Exception as e:
         messages.append("Error ocurred while searching for carparks. " + str(e))
 
-    search_params = {"start": from_datetime.strftime("%a, %-d %b %Y, %-I:%M %p"), "end": to_datetime.strftime("%a, %-d %b %Y, %-I:%M %p"), "center": center_loc, "radius": radius, "place":place}
+    #search_params = {"start": from_datetime.strftime("%a, %-d %b %Y, %-I:%M %p"), "end": to_datetime.strftime("%a, %-d %b %Y, %-I:%M %p"), "center": center_loc, "radius": radius, "place":place}
+    search_params = {"start": from_datetime.strftime("%Y-%m-%dT%H:%M"), "end": to_datetime.strftime("%Y-%m-%dT%H:%M"), "center": center_loc, "radius": radius, "place":place}
 
     if not messages:
-        return render_template("results.html", search_params=search_params, results=cheapest_carparks, schema=schema)
+        return render_template("results_dynamic.html", search_params=search_params, results=cheapest_carparks, schema=schema)
     else:
         return render_template("apology.html", messages=messages)
 
@@ -150,6 +162,8 @@ def fuzzy():
             messages.append(str(e))
         try:
             radius = int(request.form["radius"])
+            if radius > 2000:
+                raise Exception("Radius too big.")
         except Exception as e:
             messages.append("Radius invalid.")
             messages.append(str(e))
@@ -193,17 +207,18 @@ def browse():
 def contact():
     if request.method == "POST":
         try:
-            msg = Message(request.form.get("subject","No subject"), sender = 'carparkssg@gmail.com', recipients = ['carparkssg@gmail.com'])
+            msg = Message(request.form.get("subject","No subject"), sender = 'sender.carparkssg@gmail.com', recipients = ['carparkssg@gmail.com'])
             msg.body = "From: " + request.form.get("email","No email") + "\n\n" + request.form.get("message","No message")
             mail.send(msg)
             return render_template("about.html", sent=1)
         except:
             return render_template("about.html", sent=0)
     else:
+        today = date.today().isoformat()
         if "place" in request.args:
-            return render_template("about.html", place=request.args["place"])
+            return render_template("about.html", place=request.args["place"], date=today)
         else:
-            return render_template("about.html")
+            return render_template("about.html", date=today)
 
 @app.route('/terms')
 def terms():
@@ -291,3 +306,7 @@ def api_multiple():
     else:
         abort(400)
         # return jsonify(messages)
+
+@app.route('/pwabuilder-sw.js', methods=['GET'])
+def pwabuildersw():
+    return app.send_static_file('pwabuilder-sw.js')

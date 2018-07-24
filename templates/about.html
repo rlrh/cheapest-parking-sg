@@ -31,8 +31,9 @@
 <div class="row">
     <div class="col-lg-6 mt-3">
         <div class="row col">
-            <h3>Drop a message</h3>
-            <p>Want to report an error, contribute parking rates, give feedback or chat about anything else? Fill up this form or email <a href="mailto:carparkssg@gmail.com">carparkssg@gmail.com</a></p>
+            <h3 class="d-none d-md-block">Drop a message</h3>
+            <h4 class="d-block d-md-none">Drop a message</h4>
+            <p>Want to report an error, contribute parking rates, give feedback or chat about anything else? Fill up this form or email <a href="mailto:admin@carparkssg.com">admin@carparkssg.com</a></p>
         </div>
         {% if sent is defined %}
         <div class="row col">
@@ -64,7 +65,11 @@
     </div>
     <div class="col-lg-6 mt-3">
         <div class="row col">
-            <h3>About Carparks SG</h3>
+            <h3 class="d-none d-md-block">About Carparks SG</h3>
+            <h4 class="d-block d-md-none">About Carparks SG</h4>
+            <p class="text-justify">
+                <small>Carparks SG contains information from Carpark Availability dataset accessed on {{ date }} from LTA DataMall which is made available under the terms of the <a href="https://www.mytransport.sg/content/mytransport/home/dataMall/SingaporeOpenDataLicence.html">Singapore Open Data Licence version 1.0</a></small>
+            </p>
             <p class="text-justify">
                 Scratching your head trying to mentally calculate parking charges? Shocked at the price when you exit the carpark gantry? Trying to guesstimate where the cheapest carpark might be?
             </p>

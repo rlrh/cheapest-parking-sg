@@ -67,7 +67,7 @@
 {% endblock %}
 
 {% block main %}
-        <form action="{{ url_for('index') }}" method="post">
+        <form action="{{ url_for('cheapest') }}" method="get">
                 <div class="row mt-4">
                     <div class="col">
                         {% if name is defined %}
@@ -86,11 +86,14 @@
                         {% if name is defined %}
                         <div class="row mt-2 d-none">
                         {% else %}
-                        <div class="row mt-2">
+                        <div class="row mt-2 align-items-center">
                         {% endif %}
                             <label for="center" class="col-2 lead">At</label>
-                            <div class="col-10">
-                                <input class="form-control" type="text" placeholder="Search for a place or address" id="place" name="place" data-toggle="tooltip" data-placement="top" title="Search for a place or address here or drag the map marker">
+                            <div class="col-10 input-group">
+                                <input class="form-control" type="text" placeholder="Search for a place or address" id="place" name="place">
+                                <div class="input-group-append">
+                                    <button id="mylocation" class="btn btn-sm text-info" type="button"><i class="fas fa-map-marked-alt"></i></button>
+                                </div>
                             </div>
                         </div>
                         <div class="row mt-3 d-none">
@@ -142,14 +145,14 @@
                         <div class="row mt-3 d-none" id="sort_row">
                         {% endif %}
                             <label for="radio1" class="col-2 lead" style="line-height: 1.25;">Sort by</label>
-                            <div class="col-10">
-                                <div class="row">
+                            <div class="col-10 pl-4">
+                                <div class="row pl-1">
                                     <div class="col-sm-6 input-group custom-control custom-radio">
-                                        <input type="radio" id="radio1" name="radio" value="1" class="custom-control-input" checked="">
+                                        <input type="radio" id="radio1" name="pricefirst" value="1" class="custom-control-input" checked="">
                                         <label class="custom-control-label" for="radio1">Cheapest, then nearest</label>
                                     </div>
                                     <div class="col-sm-6 input-group custom-control custom-radio">
-                                        <input type="radio" id="radio0" name="radio" value="0" class="custom-control-input">
+                                        <input type="radio" id="radio0" name="pricefirst" value="0" class="custom-control-input">
                                         <label class="custom-control-label" for="radio0">Nearest, then cheapest</label>
                                     </div>
                                 </div>
@@ -261,6 +264,10 @@
                     endPicker.setDate(new Date(startPicker.selectedDates[0].getTime() + time_diff*60000), false);
 
                     {% if name is not defined %}
+                    var placepicker = document.getElementById("place");
+                    placepicker.addEventListener('click', function() {
+                        placepicker.value = "";
+                    });
                     var within_row = document.getElementById("within_row");
                     var sort_row = document.getElementById("sort_row");
                     var options_toggle = document.getElementById("options_toggle");
@@ -312,7 +319,19 @@
                                 label: "P"
                             });
                         });
-                        var markerCluster = new MarkerClusterer(mapContext, markers, {maxZoom: 15, imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+                        var markerCluster = new MarkerClusterer(mapContext, markers, {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+                        // Try HTML5 geolocation.
+                        var mylocation = document.getElementById("mylocation");
+                        mylocation.addEventListener('click', function() {
+                            if (navigator.geolocation) {
+                                navigator.geolocation.getCurrentPosition(function(position) {
+                                    $(component).locationpicker('location', {
+                                        latitude: position.coords.latitude,
+                                        longitude: position.coords.longitude,
+                                    });
+                                });
+                            }
+                        });
                     }
                 });
             </script>

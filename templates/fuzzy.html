@@ -35,6 +35,82 @@
             }
         }
     </style>
+
+    <script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+        $(function () {
+          $('[data-toggle="tooltip"]').tooltip()
+        })
+
+        // datetime picker
+        var startPicker = flatpickr("#start",
+        {
+            enableTime: true,
+            dateFormat: "Y-m-dTH:i",
+            altInput: true,
+            altFormat: "D, j M Y, h:i K",
+            defaultDate: "today",
+            minDate: "today",
+        });
+
+        var coeff = 1000 * 60 * 5;
+        var date = new Date();
+        var rounded_date = new Date(Math.ceil(date.getTime() / coeff) * coeff);
+        startPicker.setDate(rounded_date, true);
+        var placepicker = document.getElementById("place");
+        placepicker.addEventListener('click', function() {
+            placepicker.value = "";
+        });
+
+        var marker_locations = {{ markers }}.map(function(carpark) { return {lat: carpark[0], lng: carpark[1] } })
+        // console.log(marker_locations)
+
+        // initialize jquery location picker
+        $('#map').locationpicker({
+            {% if center is defined%}
+                location: { latitude: {{ center[0] }}, longitude: {{ center[1] }} },
+                radius: 50,
+            {% else %}
+                location: { latitude: 1.286194, longitude: 103.853032 }, // Fullerton/GPO
+                radius: 500,
+            {% endif %}
+            mapOptions: {clickableIcons: false},
+            inputBinding: {
+                latitudeInput: $('#lat'),
+                longitudeInput: $('#lng'),
+                radiusInput: $('#radius'),
+                locationNameInput: $('#place')
+            },
+            enableAutocomplete: true,
+            autocompleteOptions: { componentRestrictions: { country: 'sg' } },
+            addressFormat: 'point_of_interest', //'street_address',
+            oninitialized: function(component) {
+                var mapContext = $(component).locationpicker('map').map;
+                var markers = marker_locations.map(function(location, i) {
+                    return new google.maps.Marker({
+                        position: location,
+                        label: "P"
+                    });
+                });
+                var markerCluster = new MarkerClusterer(mapContext, markers, {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+                // Try HTML5 geolocation.
+                var mylocation = document.getElementById("mylocation");
+                mylocation.addEventListener('click', function() {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(function(position) {
+                            $(component).locationpicker('location', {
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude,
+                            });
+                        });
+                    }
+                });
+            }
+        });
+    }, false);
+    </script>
+
 {% endblock %}
 
 {% block navitems %}
@@ -67,8 +143,11 @@
                     <div class="col-lg-6">
                         <div class="row mt-2">
                             <label for="center" class="col-2 lead">At</label>
-                            <div class="col-10">
-                                <input class="form-control" type="text" placeholder="Search for a place or address" id="place" name="place" data-toggle="tooltip" data-placement="top" title="Search for a place or address here or drag the map marker">
+                            <div class="col-10 input-group">
+                                <input class="form-control" type="text" placeholder="Search for a place or address" id="place" name="place">
+                                <div class="input-group-append">
+                                    <button id="mylocation" class="btn btn-sm text-info" type="button"><i class="fas fa-map-marked-alt"></i></button>
+                                </div>
                             </div>
                         </div>
                         <div class="row mt-3 d-none">
@@ -87,7 +166,7 @@
                             <div class="col-10">
                                 <div class="row">
                                     <div class="col input-group">
-                                        <input class="form-control" type="number" min="0" max="2000" value="500" list="common_radii" id="radius" name="radius" data-toggle="tooltip" data-placement="top" title="Search radius (0-2000m)" />
+                                        <input class="form-control" type="number" min="0" max="2000" value="500" list="common_radii" id="radius" name="radius" data-toggle="tooltip" data-placement="top" title="Search radius (0-2000m)" autocomplete="off"/>
                                         <datalist id="common_radii">
                                             <option value="0">
                                             <option value="200">
@@ -115,11 +194,37 @@
                             <div class="col-10">
                                 <div class="row">
                                     <div class="col input-group">
-                                        <input class="form-control" type="number" min="1" max="12" value="1" placeholder="Minimum" id="start_hr" name="start_hr"  data-toggle="tooltip" data-placement="top" title="Min. hours (1-12) staying here">
+                                        <select id="start_hr" name="start_hr" class="form-control" data-toggle="tooltip" data-placement="top" title="Min. hours staying here">
+                                            <option value="1">1</option>
+                                            <option value="2" selected>2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10">10</option>
+                                            <option value="11">11</option>
+                                            <option value="12">12</option>
+                                        </select>
                                         <div class="input-group-append">
                                             <div class="input-group-text">to</div>
                                         </div>
-                                        <input class="form-control" type="number" min="1" max="12" value="4" placeholder="Maximum" id="end_hr" name="end_hr"  data-toggle="tooltip" data-placement="top" title="Max. hours (1-12) staying here">
+                                        <select id="end_hr" name="end_hr" class="form-control" data-toggle="tooltip" data-placement="top" title="Max. hours staying here">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6" selected>6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10">10</option>
+                                            <option value="11">11</option>
+                                            <option value="12">12</option>
+                                        </select>
                                         <div class="input-group-append">
                                             <div class="input-group-text d-none d-sm-block">hours</div>
                                         </div>
@@ -141,61 +246,6 @@
                 </div>
 
             </form>
-            <script>
-                $(function () {
-                  $('[data-toggle="tooltip"]').tooltip()
-                })
 
-                // datetime picker
-                var startPicker = flatpickr("#start",
-                    {
-                        enableTime: true,
-                        dateFormat: "Y-m-dTH:i",
-                        altInput: true,
-                        altFormat: "D, j M Y, h:i K",
-                        defaultDate: "today",
-                        minDate: "today",
-                    });
-
-                document.addEventListener('DOMContentLoaded', function () {
-                    var coeff = 1000 * 60 * 5;
-                    var date = new Date();
-                    var rounded_date = new Date(Math.ceil(date.getTime() / coeff) * coeff);
-                    startPicker.setDate(rounded_date, true);
-                }, false);
-
-                var marker_locations = {{ markers }}.map(function(carpark) { return {lat: carpark[0], lng: carpark[1] } })
-                // console.log(marker_locations)
-
-                // initialize jquery location picker
-                $('#map').locationpicker({
-                    {% if center is defined%}
-                        location: { latitude: {{ center[0] }}, longitude: {{ center[1] }} },
-                        radius: 50,
-                    {% else %}
-                        location: { latitude: 1.286194, longitude: 103.853032 }, // Fullerton/GPO
-                        radius: 500,
-                    {% endif %}
-                    inputBinding: {
-                        latitudeInput: $('#lat'),
-                        longitudeInput: $('#lng'),
-                        radiusInput: $('#radius'),
-                        locationNameInput: $('#place')
-                    },
-                    enableAutocomplete: true,
-                    autocompleteOptions: { componentRestrictions: { country: 'sg' } },
-                    addressFormat: 'point_of_interest', //'street_address',
-                    oninitialized: function(component) {
-                        var mapContext = $(component).locationpicker('map').map;
-                        var markers = marker_locations.map(function(location, i) {
-                            return new google.maps.Marker({
-                                position: location,
-                                label: "P"
-                            });
-                        });
-                        var markerCluster = new MarkerClusterer(mapContext, markers, {maxZoom: 14, imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
-                    }
-                });
-            </script>
             <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
 {% endblock %}

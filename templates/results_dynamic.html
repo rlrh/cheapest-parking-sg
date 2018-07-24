@@ -31,7 +31,7 @@
         @media (min-width: 768px) {
 
             .map-container:before {
-                padding-top: 56.25%;
+                padding-top: 66.7%;
             }
 
             .result-container {
@@ -42,7 +42,7 @@
             .result-container:before {
                 display: block;
                 content: '';
-                padding-top: 125%;
+                padding-top: 145%;
             }
 
             #results {
@@ -89,25 +89,42 @@
     <div class="form-row mt-3 justify-content-start">
     {% endif %}
     #}
+    <form method="GET" action="{{ url_for('cheapest') | safe }}">
     <div class="form-row mt-3 justify-content-start">
-        <div class="col-auto mt-2">
-            <span class="lead text-justify d-none d-md-block">From <span class="p-1 rounded border bg-light">{{ search_params.start }}</span> </span>
-            <span class="text-justify d-block d-md-none">From <span class="p-1 rounded border bg-light">{{ search_params.start }}</span> </span>
+        <input name="lat" type="hidden" value="{{ search_params.center[0] | safe }}">
+        <input name="lng" type="hidden" value="{{ search_params.center[1] | safe }}">
+        <input name="place" type="hidden" value="{{ search_params.place | safe }}">
+        <div class="col-auto d-flex flex-row align-items-center">
+            <span class="lead d-none d-md-block">From</span>
+            <span class="text-justify d-block d-md-none">From</span>
+            <input id="start" name="start" class="flatpickr flatpickr-input form-control form-control-sm ml-2 p-1" placeholder="Select start date and time.." type="text" readonly="readonly">
         </div>
-        <div class="col-auto mt-2">
-            <span class="lead text-justify d-none d-md-block">to <span class="p-1 rounded border bg-light">{{ search_params.end }}</span> </span>
-            <span class="text-justify d-block d-md-none">to <span class="p-1 rounded border bg-light">{{ search_params.end }}</span> </span>
+        <div class="col-auto d-flex flex-row align-items-center">
+            <span class="lead text-justify d-none d-md-block">to</span>
+            <span class="text-justify d-block d-md-none">to</span>
+            <input id="end" name="end" class="flatpickr flatpickr-input form-control form-control-sm ml-2 p-1" placeholder="Select end date and time.." type="text" readonly="readonly">
         </div>
-        <div class="col-auto mt-2 d-none d-sm-block">
-            <span class="lead text-justify d-none d-md-block">within <span class="p-1 rounded border bg-light">{{ search_params.radius }} m</span> </span>
-            <span class="text-justify d-block d-md-none">within <span class="p-1 rounded border bg-light">{{ search_params.radius }} m</span> </span>
+        <div class="col-auto d-flex flex-row align-items-center">
+            <span class="lead text-justify d-none d-md-block">within</span>
+            <span class="text-justify d-block d-md-none align-middle">within</span>
+            <input id="radius" name="radius" class="form-control form-control-sm ml-2 p-1" type="number" min="0" max="2000" value="{{ search_params.radius }}" list="common_radii"/>
+            <span class="lead text-justify d-none d-md-block align-middle">m</span>
+            <span class="text-justify d-block d-md-none align-middle">m</span>
         </div>
-        <div class="col-auto mt-2 d-none d-sm-block">
-            <span class="lead text-justify d-none d-md-block">of <span class="p-1 rounded border bg-light">{{ search_params.place }}</span></span>
-            <span class="text-justify d-block d-md-none">of <span class="p-1 rounded border bg-light">{{ search_params.place }}</span></span>
+        {% if search_params.place != "" %}
+        <div class="col-auto d-flex flex-row align-items-center">
+            <span class="lead text-justify d-none d-md-block">of</span>
+            <span class="text-justify d-block d-md-none">of</span>
+            <span class="form-control form-control-sm bg-light mx-2 p-1">{{ search_params.place }}</span>
         </div>
+        {% endif %}
+        <div class="col-auto align-items-center">
+            <button type="submit" class="btn btn-sm btn-success">Apply Changes</button>
+        </div>
+
     </div>
-    <div class="row mt-4">
+    </form>
+    <div class="row mt-3">
         <div class="col-lg-8">
             <div class="map-container">
                 <div id="map"></div>
@@ -159,7 +176,7 @@
                                 {% if result[schema.remarks] is defined %}
                                 <li class="list-group-item d-flex flex-column">
                                     <small>Not calculated</small>
-                                    <span>{{ result[schema.remarks] }}</span>
+                                    <span class="text-justify">{{ result[schema.remarks] }}</span>
                                 </li>
                                 {% endif %}
                                 <li class="list-group-item d-flex justify-content-between">
@@ -190,6 +207,37 @@
     </div>
     <script>
     document.addEventListener('DOMContentLoaded', function () {
+
+        // datetime pickers
+        var startPicker = flatpickr("#start",
+            {
+                enableTime: true,
+                dateFormat: "Y-m-dTH:i",
+                altInput: true,
+                altFormat: "D, j M Y, h:i K",
+                defaultDate: flatpickr.parseDate("{{ search_params.start }}", "Y-m-dTH:i"),
+                minDate: "today",
+                onChange: function (selectedDates, dateStr, instance) {
+                    if (endPicker.selectedDates[0] < selectedDates[0]) {
+                        endPicker.setDate(selectedDates[0], true);
+                    }
+                }
+
+            });
+        var endPicker = flatpickr("#end",
+            {
+                enableTime: true,
+                dateFormat: "Y-m-dTH:i",
+                altInput: true,
+                altFormat: "D, j M Y, h:i K",
+                defaultDate: flatpickr.parseDate("{{ search_params.end }}", "Y-m-dTH:i"),
+                minDate: "today",
+                onChange: function (selectedDates, dateStr, instance) {
+                    if (selectedDates[0] < startPicker.selectedDates[0]) {
+                        startPicker.setDate(selectedDates[0], true);
+                    }
+                }
+            });
 
         // Initialize and add the map
         var center = {lat: {{ search_params.center[0] }}, lng: {{ search_params.center[1] }}};
