@@ -102,10 +102,12 @@
             <span class="lead text-justify d-none d-md-block">within <span class="p-1 rounded border bg-light">{{ search_params.radius }} m</span> </span>
             <span class="text-justify d-block d-md-none">within <span class="p-1 rounded border bg-light">{{ search_params.radius }} m</span> </span>
         </div>
+        {% if search_params.place != "" %}
         <div class="col-auto mt-2 d-none d-sm-block">
             <span class="lead text-justify d-none d-md-block">of <span class="p-1 rounded border bg-light">{{ search_params.place }}</span></span>
             <span class="text-justify d-block d-md-none">of <span class="p-1 rounded border bg-light">{{ search_params.place }}</span></span>
         </div>
+        {% endif %}
     </div>
     <div class="row mt-4">
         <div class="col-lg-8">

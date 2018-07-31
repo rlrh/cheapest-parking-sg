@@ -78,23 +78,6 @@ def carpark_charges(carpark, start_datetime, end_datetime, schema):
                         curr_datetime = min(curr_datetime + timedelta(minutes=per_duration), charge_end_datetime)
     return result
 
-# returns raw data from LTA DataMall
-def all_carparks_availability():
-    headers = {'AccountKey': '7DXfhlXSQ3WpPNst98GfUw==', 'accept' : 'application/json'} #this is by default
-    url = 'http://datamall2.mytransport.sg/ltaodataservice/CarParkAvailabilityv2' #Resource URL
-    r = requests.get(url, headers=headers)
-    return r.json()["value"]
-
-# returns a dictionary with key as carpark id and value as available lots
-def carparks_availability(carparks, schema):
-    result = {}
-    carparks_with_id = list(filter(lambda carpark: schema["carpark_id"] in carpark, carparks))
-    carpark_ids = list(map(lambda carpark: str(carpark[schema["carpark_id"]]), carparks_with_id))
-    data = list(filter(lambda carpark: carpark["CarParkID"] in carpark_ids, all_carparks_availability() ))
-    for datum in data:
-        result[datum["CarParkID"]] = datum["AvailableLots"]
-    return result
-
 # returns a list of nearby carparks with each element as the complete data for each carpark, plus distance
 def nearby_carparks(data, center_location, radius, schema):
     result = []
@@ -107,7 +90,7 @@ def nearby_carparks(data, center_location, radius, schema):
     return result
 
 # warning - sorts in place
-def sort_carparks(data, schema, price_first=True):
+def sort_carparks(data, schema, price_first):
     if not data:
         return []
     if price_first == True:
@@ -126,37 +109,15 @@ def sort_carparks(data, schema, price_first=True):
         data.sort(key = lambda carpark: carpark[schema["distance"]])
 
 # returns a list of nearby carparks with each element as the complete data for each carpark, plus price and lots
-def cheapest_carparks_within_radius(data, center_location, radius, start_datetime, end_datetime, schema, pricefirst=True):
+def cheapest_carparks_within_radius(data, center_location, radius, start_datetime, end_datetime, schema, price_first):
 
     valid_data = nearby_carparks(data, center_location, radius, schema)
     if not valid_data:
         return []
-    available_lots = carparks_availability(valid_data, schema)
     for carpark in valid_data:
         carpark[schema["price"]] = carpark_charges(carpark, start_datetime, end_datetime, schema)
-        try:
-            if carpark[schema["carpark_id"]] in available_lots:
-                carpark[schema["lots"]] = available_lots[carpark[schema["carpark_id"]]]
-            else:
-                carpark[schema["lots"]] = -1
-        except:
-            carpark[schema["lots"]] = -1
-    sort_carparks(valid_data, schema, price_first=pricefirst)
+    sort_carparks(valid_data, schema, price_first)
     return valid_data
-
-def add_carparks_availability(data, schema):
-    if not data:
-        return data
-    available_lots = carparks_availability(data, schema)
-    for carpark in data:
-        try:
-            if carpark[schema["carpark_id"]] in available_lots:
-                carpark[schema["lots"]] = available_lots[carpark[schema["carpark_id"]]]
-            else:
-                carpark[schema["lots"]] = -1
-        except:
-            carpark[schema["lots"]] = -1
-    return data
 
 def cheapest_carparks_for_durations(data, center_location, radius, start_datetime, start_hr, end_hr, schema):
 
@@ -165,15 +126,6 @@ def cheapest_carparks_for_durations(data, center_location, radius, start_datetim
     valid_data = nearby_carparks(data, center_location, radius, schema)
     if not valid_data:
         return []
-    available_lots = carparks_availability(valid_data, schema)
-    for carpark in valid_data:
-        try:
-            if carpark[schema["carpark_id"]] in available_lots:
-                carpark[schema["lots"]] = available_lots[carpark[schema["carpark_id"]]]
-            else:
-                carpark[schema["lots"]] = -1
-        except:
-            carpark[schema["lots"]] = -1
 
     for hours in range(start_hr, end_hr + 1):
         #print("from:", from_datetime, "to:", start_datetime + timedelta(hours=hours))

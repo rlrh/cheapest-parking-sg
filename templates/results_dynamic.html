@@ -176,7 +176,7 @@
                                 {% if result[schema.remarks] is defined %}
                                 <li class="list-group-item d-flex flex-column">
                                     <small>Not calculated</small>
-                                    <span class="text-justify">{{ result[schema.remarks] }}</span>
+                                    <span>{{ result[schema.remarks] }}</span>
                                 </li>
                                 {% endif %}
                                 <li class="list-group-item d-flex justify-content-between">
@@ -263,7 +263,6 @@
                 position: {lat: {{ result[schema.location][0] }}, lng: {{ result[schema.location][1]}} },
                 label: String({{loop.index}}),
                 animation: google.maps.Animation.DROP,
-                map: map,
                 labelContent: info,
                 labelAnchor: new google.maps.Point(22, 0),
                 labelClass: style, // the CSS class for the label

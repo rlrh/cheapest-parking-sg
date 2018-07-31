@@ -1,3 +1,4 @@
+import sys
 import json
 import requests
 from flask import Flask, flash, redirect, render_template, request, session, url_for, jsonify, abort
@@ -7,7 +8,8 @@ from copy import deepcopy
 from helpers import *
 from flask_mail import Mail, Message
 
-data_file = "data-lta-orchard-cbd-minified.json"
+#data_file = "data-lta-orchard-cbd-cbdnorth-cbdsouth-jurong-ura-hdb-lhn-metro-minified.json"
+data_file = "data.json"
 data_schema_file = "data-schema.json"
 
 app = Flask(__name__)
@@ -20,17 +22,21 @@ app.config['MAIL_PASSWORD'] = 'sgparkscar'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
-
+"""
 with app.open_resource(data_file) as f:
     data = json.load(f)
     data_length = len(data)
+"""
 with app.open_resource(data_schema_file) as schema_file:
     schema = json.load(schema_file)
+
 
 # WEBSITE ROUTES
 
 @app.route('/', methods=["GET", "POST"])
 def index():
+    with app.open_resource(data_file) as f:
+        data = json.load(f)
     if request.method == "POST":
         messages = []
         try:
@@ -60,12 +66,12 @@ def index():
             messages.append("Radius invalid.")
             messages.append(str(e))
         try:
-            radio = bool(int(request.form["radio"]))
+            radio = bool(int(request.form["pricefirst"]))
         except Exception as e:
             messages.append("Sorting method invalid.")
             messages.append(str(e))
         try:
-            cheapest_carparks = cheapest_carparks_within_radius(data, center_loc, radius, from_datetime, to_datetime, schema, pricefirst=radio)
+            cheapest_carparks = cheapest_carparks_within_radius(data, center_loc, radius, from_datetime, to_datetime, schema, radio)
         except Exception as e:
             messages.append("Error ocurred while searching for carparks.")
             messages.append(str(e))
@@ -79,7 +85,7 @@ def index():
     else:
         carpark_id = int(request.args.get('id', -1))
         markers = list(map(lambda carpark: carpark[schema["location"]], data))
-        if carpark_id != -1 and carpark_id < data_length:
+        if carpark_id != -1 and carpark_id < len(data):
             center = data[carpark_id][schema["location"]]
             name = data[carpark_id][schema["name"]]
             return render_template("index.html", markers=markers, schema=schema, center=center, name=name)
@@ -88,6 +94,8 @@ def index():
 
 @app.route('/find')
 def cheapest():
+    with app.open_resource(data_file) as f:
+        data = json.load(f)
     messages = []
     try:
         from_datetime = datetime.strptime(request.args["start"], "%Y-%m-%dT%H:%M")
@@ -115,7 +123,7 @@ def cheapest():
     except Exception as e:
         messages.append("Radius invalid. " + str(e))
     try:
-        radio = bool(int(request.form.get("pricefirst", 1)))
+        radio = bool(int(request.args.get("pricefirst", 1)))
     except Exception as e:
         messages.append("Sorting method invalid.")
         messages.append(str(e))
@@ -124,7 +132,7 @@ def cheapest():
     except Exception as e:
         messages.append("Place invalid. " + str(e))
     try:
-        cheapest_carparks = cheapest_carparks_within_radius(data, center_loc, radius, from_datetime, to_datetime, schema, pricefirst=radio)
+        cheapest_carparks = cheapest_carparks_within_radius(data, center_loc, radius, from_datetime, to_datetime, schema, radio)
     except Exception as e:
         messages.append("Error ocurred while searching for carparks. " + str(e))
 
@@ -138,6 +146,8 @@ def cheapest():
 
 @app.route('/multi', methods=["GET", "POST"])
 def fuzzy():
+    with app.open_resource(data_file) as f:
+        data = json.load(f)
     if request.method == "POST":
         messages = []
         try:
@@ -194,10 +204,11 @@ def fuzzy():
 
 @app.route('/browse')
 def browse():
+    with app.open_resource(data_file) as f:
+        data = json.load(f)
     carpark_id = int(request.args.get('id', -1))
     markers = list(map(lambda carpark: carpark[schema["location"]], data))
-    add_carparks_availability(data, schema)
-    if carpark_id != -1 and carpark_id < data_length:
+    if carpark_id != -1 and carpark_id < len(data):
         center = data[carpark_id][schema["location"]]
         return render_template("browse_ajax.html", markers=markers, id=carpark_id, center=center, name=data[carpark_id][schema["name"]])
     else:
@@ -208,7 +219,6 @@ def contact():
     if request.method == "POST":
         try:
             msg = Message(request.form.get("subject","No subject"), sender = 'sender.carparkssg@gmail.com', recipients = ['carparkssg@gmail.com'])
-            msg.body = "From: " + request.form.get("email","No email") + "\n\n" + request.form.get("message","No message")
             mail.send(msg)
             return render_template("about.html", sent=1)
         except:
@@ -228,13 +238,17 @@ def terms():
 
 @app.route('/api/all')
 def api_all():
+    with app.open_resource(data_file) as f:
+        data = json.load(f)
     try:
-        return jsonify(add_carparks_availability(data, schema))
+        return jsonify(data, schema)
     except:
         return abort(400)
 
 @app.route('/api/single')
 def api_single():
+    with app.open_resource(data_file) as f:
+        data = json.load(f)
     try:
         carpark_id = int(request.args["id"])
         return jsonify(data[carpark_id], schema)
@@ -243,6 +257,8 @@ def api_single():
 
 @app.route('/api/singleprice')
 def api_single_price():
+    with app.open_resource(data_file) as f:
+        data = json.load(f)
     messages = []
     try:
         from_datetime = datetime.strptime(request.args["start"], "%Y-%m-%dT%H:%M")
@@ -276,6 +292,8 @@ def api_single_price():
 
 @app.route('/api/multipleprice')
 def api_multiple():
+    with app.open_resource(data_file) as f:
+        data = json.load(f)
     messages = []
     try:
         from_datetime = datetime.strptime(request.args["start"], "%Y-%m-%dT%H:%M")
@@ -307,6 +325,18 @@ def api_multiple():
         abort(400)
         # return jsonify(messages)
 
+# Service Workers
+
+@app.route('/offline', methods=['GET'])
+def offline():
+    with app.open_resource(data_file) as f:
+        data = json.load(f)
+    return render_template("offline.html", results=data, schema=schema)
+
 @app.route('/pwabuilder-sw.js', methods=['GET'])
 def pwabuildersw():
     return app.send_static_file('pwabuilder-sw.js')
+
+@app.route('/offline.html', methods=['GET'])
+def offlinehtml():
+    return app.send_static_file('offline.html')

@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Offline Mode
+{% endblock %}
+
+{% block desc %}
+    Offline Mode
+{% endblock %}
+            
+{% block main %}
+    <div class="alert alert-warning mt-3" role="alert">
+      Offline mode - go online for full functionality
+    </div>
+    <div class="row mt-3">
+        <div class="col-md">
+            <h4>{{ results | length }} Carparks</h4>
+        </div>
+        <div class="col-md">
+            <input class="form-control form-control-sm" id="search" type="text" placeholder="Search for a carpark">
+        </div>
+    </div>
+    <div class="row mt-3" id="results">
+    {% for result in results %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ result[schema.name] }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ result[schema.address] }}</h6>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for rate in result[schema.human_rates] %}
+                    <li class="list-group-item d-flex flex-column">
+                        <strong class="text-primary">{{ rate[schema.human_interval] }}</strong>
+                        <span class="text-muted">{{ rate[schema.human_price] }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+<script>
+    $('input#search').quicksearch('div#results div.col-md-4');
+</script>
+{% endblock %}

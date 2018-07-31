@@ -59,8 +59,12 @@
         var rounded_date = new Date(Math.ceil(date.getTime() / coeff) * coeff);
         startPicker.setDate(rounded_date, true);
         var placepicker = document.getElementById("place");
-        placepicker.addEventListener('click', function() {
+        var curr_place = "";
+        placepicker.addEventListener('focus', function() {
             placepicker.value = "";
+        });
+        placepicker.addEventListener('blur', function() {
+            placepicker.value = curr_place;
         });
 
         var marker_locations = {{ markers }}.map(function(carpark) { return {lat: carpark[0], lng: carpark[1] } })
@@ -86,6 +90,7 @@
             autocompleteOptions: { componentRestrictions: { country: 'sg' } },
             addressFormat: 'point_of_interest', //'street_address',
             oninitialized: function(component) {
+                curr_place = placepicker.value;
                 var mapContext = $(component).locationpicker('map').map;
                 var markers = marker_locations.map(function(location, i) {
                     return new google.maps.Marker({
@@ -106,6 +111,9 @@
                         });
                     }
                 });
+            },
+            onchanged: function(currentLocation, radius, isMarkerDropped) {
+                curr_place = placepicker.value;
             }
         });
     }, false);
