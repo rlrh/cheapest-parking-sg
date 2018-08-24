@@ -2,188 +2,34 @@
 
 {% block title %}
     {% if name is defined %}
-    Cheapest Carparks Around {{name}}
+    Cheapest Car Parks Around {{name}}
     {% else %}
-    Find Cheapest Carparks Around Singapore
+    Find Cheapest Car Parks Around Singapore
     {% endif %}
 {% endblock %}
 
 {% block desc %}
     {% if name is defined %}
-    Compare parking charges of carparks around {{name}} to find the best price. Calculate parking charges automatically and see parking rates, real-time lot availability & other info.
+    Compare parking charges of car parks around {{name}} to find the best price. Calculate parking charges automatically and see parking rates, real-time lot availability & other info.
     {% else %}
-    Compare parking charges of carparks all over Singapore to find the best price. Calculate parking charges automatically and see parking rates, real-time lot availability & other info.
+    Compare parking charges of car parks all over Singapore to find the best price. Calculate parking charges automatically and see parking rates, real-time lot availability & other info.
     {% endif %}
 {% endblock %}
 
 {% block style %}
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    if(navigator.userAgent.match(/Windows Phone/i)){
-            alert("Incompatible web browser - user experience may be suboptimal");
-    };
-
-    $(function () {
-      $('[data-toggle="tooltip"]').tooltip()
-    })
-
-    if(navigator.userAgent.match(/Windows Phone/i)){
-
-        // datetime pickers
-        var startPicker = flatpickr("#start",
-            {
-                disableMobile: true,
-                enableTime: true,
-                dateFormat: "Y-m-dTH:i",
-                altInput: true,
-                altFormat: "D, j M Y, h:i K",
-                defaultDate: "today",
-                minDate: "today",
-                onChange: function (selectedDates, dateStr, instance) {
-                    if (endPicker.selectedDates[0] < selectedDates[0]) {
-                        endPicker.setDate(selectedDates[0], true);
-                    }
-                }
-
-            });
-        var endPicker = flatpickr("#end",
-            {
-                disableMobile: true,
-                enableTime: true,
-                dateFormat: "Y-m-dTH:i",
-                altInput: true,
-                altFormat: "D, j M Y, h:i K",
-                defaultDate: "today",
-                minDate: "today",
-                onChange: function (selectedDates, dateStr, instance) {
-                    if (selectedDates[0] < startPicker.selectedDates[0]) {
-                        startPicker.setDate(selectedDates[0], true);
-                    }
-                }
-            });
-    } else {
-
-        // datetime pickers
-        var startPicker = flatpickr("#start",
-            {
-                enableTime: true,
-                dateFormat: "Y-m-dTH:i",
-                altInput: true,
-                altFormat: "D, j M Y, h:i K",
-                defaultDate: "today",
-                minDate: "today",
-                onChange: function (selectedDates, dateStr, instance) {
-                    if (endPicker.selectedDates[0] < selectedDates[0]) {
-                        endPicker.setDate(selectedDates[0], true);
-                    }
-                }
-
-            });
-        var endPicker = flatpickr("#end",
-            {
-                enableTime: true,
-                dateFormat: "Y-m-dTH:i",
-                altInput: true,
-                altFormat: "D, j M Y, h:i K",
-                defaultDate: "today",
-                minDate: "today",
-                onChange: function (selectedDates, dateStr, instance) {
-                    if (selectedDates[0] < startPicker.selectedDates[0]) {
-                        startPicker.setDate(selectedDates[0], true);
-                    }
-                }
-            });
-    }
-
-    // set start & end picker to nice datetimes
-    var time_diff = 120;
-    var coeff = 1000 * 60 * 5;
-    var date = new Date();
-    var rounded_date = new Date(Math.ceil(date.getTime() / coeff) * coeff);
-    startPicker.setDate(rounded_date, false);
-    endPicker.setDate(new Date(startPicker.selectedDates[0].getTime() + time_diff*60000), false);
-
-    {% if name is not defined %}
-    var placepicker = document.getElementById("place");
-    var curr_place = "";
-    placepicker.addEventListener('focus', function() {
-        placepicker.value = "";
-    });
-    placepicker.addEventListener('blur', function() {
-        placepicker.value = curr_place;
-    });
-    var within_row = document.getElementById("within_row");
-    var sort_row = document.getElementById("sort_row");
-    var options_toggle = document.getElementById("options_toggle");
-    options_toggle.addEventListener('click', function() {
-        within_row.classList.toggle("d-none");
-        sort_row.classList.toggle("d-none");
-
-        if (options_toggle.innerHTML == "<i class=\"fas fa-caret-down\"></i> More Options"){
-            options_toggle.innerHTML = "<i class=\"fas fa-caret-up\"></i> Less Options";
-        } else {
-            options_toggle.innerHTML = "<i class=\"fas fa-caret-down\"></i> More Options";
+    <style>
+        .event {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 150px;
+            bottom: 5px;
+            left: calc(50% - 2.5px);
+            content: " ";
+            display: block;
+            background: #f64747;
         }
 
-    });
-    var media_query = window.matchMedia("(min-width: 768px)");
-    if (media_query.matches) {
-        options_toggle.click();
-    }
-    {% endif %}
-
-    var marker_locations = {{ markers }}.map(function(location) { return {lat: location[0], lng: location[1] } })
-    // console.log(marker_locations)
-
-    // initialize jquery location picker
-    $('#map').locationpicker({
-        {% if center is defined %}
-            location: { latitude: {{ center[0] }}, longitude: {{ center[1] }} },
-        {% else %}
-            location: { latitude: 1.286194, longitude: 103.853032 }, // Fullerton/GPO
-        {% endif %}
-        radius: 300,
-        mapOptions: {clickableIcons: false},
-        inputBinding: {
-            latitudeInput: $('#lat'),
-            longitudeInput: $('#lng'),
-            radiusInput: $('#radius'),
-            locationNameInput: $('#place')
-        },
-        enableAutocomplete: true,
-        autocompleteOptions: { componentRestrictions: { country: 'sg' } },
-        addressFormat: 'point_of_interest', //'street_address',
-        oninitialized: function(component) {
-            curr_place = placepicker.value;
-            var mapContext = $(component).locationpicker('map').map;
-            var markers = marker_locations.map(function(location, i) {
-                return new google.maps.Marker({
-                    position: location,
-                    label: "P"
-                });
-            });
-            var markerCluster = new MarkerClusterer(mapContext, markers, {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
-            // Try HTML5 geolocation.
-            var mylocation = document.getElementById("mylocation");
-            mylocation.addEventListener('click', function() {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(function(position) {
-                        $(component).locationpicker('location', {
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                        });
-                    });
-                }
-            });
-        },
-        onchanged: function(currentLocation, radius, isMarkerDropped) {
-            curr_place = placepicker.value;
-        }
-    });
-});
-</script>
-
-<style>
         .map-container {
             position: relative;
         }
@@ -213,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 padding-top: 75%;
             }
         }
-</style>
+    </style>
 {% endblock %}
 {% block navitems %}
     <li class="nav-item active">
@@ -258,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             <div class="col-10 input-group">
                                 <input class="form-control" type="text" placeholder="Search for a place or address" id="place" name="place">
                                 <div class="input-group-append">
-                                    <button id="mylocation" class="btn btn-sm text-info" type="button"><i class="fas fa-map-marked-alt"></i></button>
+                                    <button id="mylocation" class="btn btn-sm text-info" type="button" data-toggle="tooltip" data-placement="top" title="Get my location"><i class="fas fa-map-marker-alt"></i></button>
                                 </div>
                             </div>
                         </div>
@@ -276,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         {% endif %}
                             <label for="radius" class="col-2 lead">Within</label>
                             <div class="col-10 input-group">
-                                <input class="form-control" type="number" placeholder="Search radius (0-2000m)" min="0" max="2000" value="500" list="common_radii" id="radius" name="radius" data-toggle="tooltip" data-placement="top" title="Search radius (0-2000m)" />
+                                <input class="form-control" type="number" placeholder="Search radius (0-2000m)" min="0" max="2000" value="300" list="common_radii" id="radius" name="radius" data-toggle="tooltip" data-placement="top" title="Search radius (0-2000m)" />
                                 <datalist id="common_radii">
                                     <option value="0">
                                     <option value="200">
@@ -343,5 +189,205 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
 
             </form>
+
+    <script>
+    if(navigator.userAgent.match(/Windows Phone/i)){
+            alert("Incompatible web browser - user experience may be suboptimal");
+    };
+
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip()
+    })
+
+    var holidays = {{ holidays | safe }};
+
+    if(navigator.userAgent.match(/Windows Phone/i)){
+
+        // datetime pickers
+        var startPicker = flatpickr("#start",
+            {
+                disableMobile: true,
+                enableTime: true,
+                dateFormat: "Y-m-dTH:i",
+                altInput: true,
+                altFormat: "D, j M Y, h:i K",
+                defaultDate: "today",
+                minDate: "today",
+                onChange: function (selectedDates, dateStr, instance) {
+                    if (endPicker.selectedDates[0] < selectedDates[0]) {
+                        endPicker.setDate(selectedDates[0], true);
+                    }
+                },
+                onDayCreate: function(dObj, dStr, fp, dayElem) {
+                    // Utilize dayElem.dateObj, which is the corresponding Date
+                    date_str = flatpickr.formatDate(dayElem.dateObj, "Y-m-d");
+                    for (var i = 0; i < holidays.length; i++) {
+                        if (date_str == holidays[i]) {
+                            dayElem.innerHTML += "<span class='event'></span>";
+                        }
+                    }
+                }
+            });
+        var endPicker = flatpickr("#end",
+            {
+                disableMobile: true,
+                enableTime: true,
+                dateFormat: "Y-m-dTH:i",
+                altInput: true,
+                altFormat: "D, j M Y, h:i K",
+                defaultDate: "today",
+                minDate: "today",
+                onChange: function (selectedDates, dateStr, instance) {
+                    if (selectedDates[0] < startPicker.selectedDates[0]) {
+                        startPicker.setDate(selectedDates[0], true);
+                    }
+                },
+                onDayCreate: function(dObj, dStr, fp, dayElem) {
+                    // Utilize dayElem.dateObj, which is the corresponding Date
+                    date_str = flatpickr.formatDate(dayElem.dateObj, "Y-m-d");
+                    for (var i = 0; i < holidays.length; i++) {
+                        if (date_str == holidays[i]) {
+                            dayElem.innerHTML += "<span class='event'></span>";
+                        }
+                    }
+                }
+            });
+    } else {
+
+        // datetime pickers
+        var startPicker = flatpickr("#start",
+            {
+                enableTime: true,
+                dateFormat: "Y-m-dTH:i",
+                altInput: true,
+                altFormat: "D, j M Y, h:i K",
+                defaultDate: "today",
+                minDate: "today",
+                onChange: function (selectedDates, dateStr, instance) {
+                    if (endPicker.selectedDates[0] < selectedDates[0]) {
+                        endPicker.setDate(selectedDates[0], true);
+                    }
+                },
+                onDayCreate: function(dObj, dStr, fp, dayElem) {
+                    // Utilize dayElem.dateObj, which is the corresponding Date
+                    date_str = flatpickr.formatDate(dayElem.dateObj, "Y-m-d");
+                    for (var i = 0; i < holidays.length; i++) {
+                        if (date_str == holidays[i]) {
+                            dayElem.innerHTML += "<span class='event'></span>";
+                        }
+                    }
+                }
+            });
+        var endPicker = flatpickr("#end",
+            {
+                enableTime: true,
+                dateFormat: "Y-m-dTH:i",
+                altInput: true,
+                altFormat: "D, j M Y, h:i K",
+                defaultDate: "today",
+                minDate: "today",
+                onChange: function (selectedDates, dateStr, instance) {
+                    if (selectedDates[0] < startPicker.selectedDates[0]) {
+                        startPicker.setDate(selectedDates[0], true);
+                    }
+                },
+                onDayCreate: function(dObj, dStr, fp, dayElem) {
+                    // Utilize dayElem.dateObj, which is the corresponding Date
+                    date_str = flatpickr.formatDate(dayElem.dateObj, "Y-m-d");
+                    for (var i = 0; i < holidays.length; i++) {
+                        if (date_str == holidays[i]) {
+                            dayElem.innerHTML += "<span class='event'></span>";
+                        }
+                    }
+                }
+            });
+    }
+
+    // set start & end picker to nice datetimes
+    var time_diff = 120;
+    var coeff = 1000 * 60 * 5;
+    var date = new Date();
+    var rounded_date = new Date(Math.ceil(date.getTime() / coeff) * coeff);
+    startPicker.setDate(rounded_date, false);
+    endPicker.setDate(new Date(startPicker.selectedDates[0].getTime() + time_diff*60000), false);
+
+    {% if name is not defined %}
+    var placepicker = document.getElementById("place");
+    var curr_place = "";
+    placepicker.addEventListener('focus', function() {
+        placepicker.value = "";
+    });
+    placepicker.addEventListener('blur', function() {
+        placepicker.value = curr_place;
+    });
+    var within_row = document.getElementById("within_row");
+    var sort_row = document.getElementById("sort_row");
+    var options_toggle = document.getElementById("options_toggle");
+    options_toggle.addEventListener('click', function() {
+        within_row.classList.toggle("d-none");
+        sort_row.classList.toggle("d-none");
+
+        if (options_toggle.innerHTML == "<i class=\"fas fa-caret-down\"></i> More Options"){
+            options_toggle.innerHTML = "<i class=\"fas fa-caret-up\"></i> Less Options";
+        } else {
+            options_toggle.innerHTML = "<i class=\"fas fa-caret-down\"></i> More Options";
+        }
+
+    });
+    var media_query = window.matchMedia("(min-width: 768px)");
+    if (media_query.matches) {
+        options_toggle.click();
+    }
+    {% endif %}
+    // initialize jquery location picker
+    $('#map').locationpicker({
+        {% if center is defined %}
+            location: { latitude: {{ center[0] }}, longitude: {{ center[1] }} },
+        {% else %}
+            location: { latitude: 1.286194, longitude: 103.853032 }, // Fullerton/GPO
+        {% endif %}
+        radius: 300,
+        mapOptions: {clickableIcons: false},
+        inputBinding: {
+            latitudeInput: $('#lat'),
+            longitudeInput: $('#lng'),
+            radiusInput: $('#radius'),
+            locationNameInput: $('#place')
+        },
+        enableAutocomplete: true,
+        autocompleteOptions: { componentRestrictions: { country: 'sg' } },
+        addressFormat: 'point_of_interest', //'street_address',
+        oninitialized: function(component) {
+            {% if name is not defined %}
+            curr_place = placepicker.value;
+            {% endif %}
+            var mapContext = $(component).locationpicker('map').map;
+            var marker_locations = {{ markers }}.map(function(location) { return {lat: location[0], lng: location[1] } })
+            var markers = marker_locations.map(function(location, i) {
+                return new google.maps.Marker({
+                    position: location,
+                    label: "P"
+                });
+            });
+            var markerCluster = new MarkerClusterer(mapContext, markers, {maxZoom: 20, averageCenter: true, imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+            // Try HTML5 geolocation.
+            var mylocation = document.getElementById("mylocation");
+            mylocation.addEventListener('click', function() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        $(component).locationpicker('location', {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                        });
+                    });
+                }
+            });
+        }{% if name is not defined %},
+        onchanged: function(currentLocation, radius, isMarkerDropped) {
+            curr_place = placepicker.value;
+        }
+        {% endif %}
+    });
+    </script>
 
 {% endblock %}

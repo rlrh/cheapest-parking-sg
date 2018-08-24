@@ -4,6 +4,8 @@ from datetime import date, time, datetime, timedelta
 from geopy.distance import vincenty
 from copy import deepcopy
 
+holidays = [ date(2018,8,9), date(2018,8,22), date(2018,11,6), date(2018,12,25), date(2019,1,1), date(2019,2,5), date(2019,2,6), date(2019,4,19), date(2019,5,1), date(2019,5,19), date(2019,6,5), date(2019,8,9), date(2019,8,11), date(2019,10,27), date(2019,12,25) ]
+
 def str_to_time(string):
     split = list(map(lambda number: int(number), string.split(":")))
     if len(split) == 2:
@@ -31,7 +33,13 @@ def carpark_charges(carpark, start_datetime, end_datetime, schema):
 
         has_rate = False
         curr_rate = 0
-        curr_rate_end_datetime = 0
+        # curr_rate_end_datetime = 0
+
+        days_diff = 0
+        if curr_datetime.date() in holidays:
+            days_diff = curr_datetime.weekday() - 6
+            curr_datetime += timedelta(days = -days_diff)
+            end_datetime += timedelta(days= -days_diff)
 
         start_day = curr_datetime.weekday()
         # find matching rate
@@ -60,7 +68,9 @@ def carpark_charges(carpark, start_datetime, end_datetime, schema):
                 if curr_datetime >= end_datetime:
                     return result
 
-                cents, per_duration, for_duration = charge.values()
+                cents = charge[schema["rate_cost"]]
+                per_duration = charge[schema["rate_per"]]
+                for_duration = charge[schema["rate_for"]]
 
                 if for_duration != 0: # initial charges
                     charge_end_datetime = min(curr_rate_end_datetime, curr_datetime + timedelta(minutes=for_duration))
@@ -76,6 +86,10 @@ def carpark_charges(carpark, start_datetime, end_datetime, schema):
                             return result
                         result += cents
                         curr_datetime = min(curr_datetime + timedelta(minutes=per_duration), charge_end_datetime)
+
+            curr_datetime += timedelta(days = days_diff)
+            end_datetime += timedelta(days = days_diff)
+
     return result
 
 # returns a list of nearby carparks with each element as the complete data for each carpark, plus distance

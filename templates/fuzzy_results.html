@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block desc %}
-    Cheapest carparks within {{ search_params.radius }} m of {{ search_params.place }} from {{ search_params.start_hr }} to {{ search_params.end_hr }} Hours
+    Cheapest carparks within {{ search_params.radius }} m of {{ search_params.place }} for {{ search_params.start_hr }} to {{ search_params.end_hr }} Hours
 {% endblock %}
 
 {% block style %}
@@ -31,7 +31,7 @@
         @media (min-width: 768px) {
 
             .map-container:before {
-                padding-top: 56.25%;
+                padding-top: 66.7%;
             }
 
             .result-container {
@@ -42,7 +42,7 @@
             .result-container:before {
                 display: block;
                 content: '';
-                padding-top: 125%;
+                padding-top: 145%;
             }
 
             #results {
@@ -136,10 +136,16 @@
                                 <span class="text-muted">Distance</span>
                                 <span class="lead">{{ '%0.0f'| format(result[schema.distance]) }} m</span>
                             </div>
-                            {% if result[schema.lots] != -1 %}
+                            {% if result[schema.lots] | int != -1 %}
                             <div class="d-flex flex-column">
-                                <span class="text-muted">Lots</span>
+                                <span>Lots</span>
+                                {% if result[schema.lots] | int < 1 %}
+                                <span class="text-danger lead">{{ result[schema.lots] }}</span>
+                                {% elif result[schema.lots] | int < 10 %}
+                                <span class="text-warning lead">{{ result[schema.lots] }}</span>
+                                {% else %}
                                 <span class="text-success lead">{{ result[schema.lots] }}</span>
+                                {% endif %}
                             </div>
                             {% endif %}
                         </li>
@@ -162,45 +168,45 @@
         </div>
     </div>
     <script>
-        // Initialize and add the map
-        var center = {lat: {{ search_params.center[0] }}, lng: {{ search_params.center[1] }}};
-        var map = new google.maps.Map(document.getElementById('map'), {zoom: 15, center: center});
+    // Initialize and add the map
+    var center = {lat: {{ search_params.center[0] }}, lng: {{ search_params.center[1] }}};
+    var map = new google.maps.Map(document.getElementById('map'), {zoom: 15, center: center});
 
-        var markers = [];
+    var markers = [];
 
-        // The marker, positioned at center
-        var marker = new google.maps.Marker({position: center, map: map});
+    // The marker, positioned at center
+    var marker = new google.maps.Marker({position: center, map: map});
+    markers.push(marker);
+
+    // markers structure [{location: {hours:<list>, index:<int>}]
+    {% for marker in markers %}
+        var info = {{ markers[marker]["hours"] }}.toString() + "hr";
+        var style = "shadow p-1 mb-1 bg-primary text-light rounded"
+        var marker = new MarkerWithLabel({
+            position: {lat: {{ marker[0] }}, lng: {{ marker[1]}} },
+            label: "P",
+            map: map,
+            animation: google.maps.Animation.DROP,
+            labelContent: info,
+            labelAnchor: new google.maps.Point(15, 0),
+            labelClass: style, // the CSS class for the label
+            labelStyle: {opacity: 1.0}
+        });
+
+        marker.addListener('click', function() {
+            var element = document.getElementById("card{{ markers[marker]['index'] }}");
+            element.scrollIntoView({behavior: "smooth"});
+        });
+
         markers.push(marker);
+    {% endfor %}
 
-        // markers structure [{location: {hours:<list>, index:<int>}]
-        {% for marker in markers %}
-            var info = {{ markers[marker]["hours"] }}.toString() + "hr";
-            var style = "shadow p-1 mb-1 bg-primary text-light rounded"
-            var marker = new MarkerWithLabel({
-                position: {lat: {{ marker[0] }}, lng: {{ marker[1]}} },
-                label: "P",
-                map: map,
-                animation: google.maps.Animation.DROP,
-                labelContent: info,
-                labelAnchor: new google.maps.Point(15, 0),
-                labelClass: style, // the CSS class for the label
-                labelStyle: {opacity: 1.0}
-            });
-
-            marker.addListener('click', function() {
-                var element = document.getElementById("card{{ markers[marker]['index'] }}");
-                element.scrollIntoView({behavior: "smooth"});
-            });
-
-            markers.push(marker);
-        {% endfor %}
-
-        // Fit map to markers
-        var bound = new google.maps.LatLngBounds();
-        for(var i in markers) {
-            bound.extend(markers[i].getPosition());
-        }
-        map.fitBounds(bound);
+    // Fit map to markers
+    var bound = new google.maps.LatLngBounds();
+    for(var i in markers) {
+        bound.extend(markers[i].getPosition());
+    }
+    map.fitBounds(bound);
     </script>
 
 {% endblock %}

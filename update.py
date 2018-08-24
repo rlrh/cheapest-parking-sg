@@ -41,31 +41,31 @@ def ura_carparks_availability():
 def gov_carparks_availability():
     url = 'https://api.data.gov.sg/v1/transport/carpark-availability' #Resource URL
     r = requests.get(url)
-    return r.json()["items"]["carpark_data"]
+    return r.json()["items"][0]["carpark_data"]
 
 # returns a dictionary with key as carpark id and value as available lots
 def carparks_availability(carparks, schema):
     result = {}
     carparks_with_id = list(filter(lambda carpark: schema["carpark_id"] in carpark, carparks))
     carpark_ids = list(map(lambda carpark: str(carpark[schema["carpark_id"]]), carparks_with_id))
-    data1 = list(filter(lambda carpark: carpark["CarParkID"] in carpark_ids, lta_carparks_availability() ))
+    data1 = list(filter(lambda carpark: carpark["CarParkID"] in carpark_ids, lta_carparks_availability()[:50] ))
     for datum in data1:
         result[datum["CarParkID"]] = datum["AvailableLots"]
-    data2 = list(filter(lambda carpark: carpark["CarParkID"] in carpark_ids, lta_carparks_availability2() ))
-    for datum in data2:
-        result[datum["CarParkID"]] = datum["AvailableLots"]
-    data3 = list(filter(lambda carpark: carpark["CarParkID"] in carpark_ids, lta_carparks_availability3() ))
-    for datum in data3:
-        result[datum["CarParkID"]] = datum["AvailableLots"]
-    data4 = list(filter(lambda carpark: carpark["CarParkID"] in carpark_ids, lta_carparks_availability4() ))
-    for datum in data4:
-        result[datum["CarParkID"]] = datum["AvailableLots"]
+    #data2 = list(filter(lambda carpark: carpark["CarParkID"] in carpark_ids, lta_carparks_availability2() ))
+    #for datum in data2:
+    #    result[datum["CarParkID"]] = datum["AvailableLots"]
+    #data3 = list(filter(lambda carpark: carpark["CarParkID"] in carpark_ids, lta_carparks_availability3() ))
+    #for datum in data3:
+    #    result[datum["CarParkID"]] = datum["AvailableLots"]
+    #data4 = list(filter(lambda carpark: carpark["CarParkID"] in carpark_ids, lta_carparks_availability4() ))
+    #for datum in data4:
+    #    result[datum["CarParkID"]] = datum["AvailableLots"]
     data5 = list(filter(lambda carpark: carpark["carparkNo"] in carpark_ids and carpark["lotType"] == "C", ura_carparks_availability() ))
     for datum in data5:
         result[datum["carparkNo"]] = datum["lotsAvailable"]
-    #data3 = list(filter(lambda carpark: carpark["carpark_number"] in carpark_ids, gov_carparks_availability() ))
-    #for datum in data3:
-    #    result[datum["carpark_number"]] = datum["carpark_info"][0]["lots_available"]
+    data6 = list(filter(lambda carpark: carpark["carpark_number"] in carpark_ids, gov_carparks_availability() ))
+    for datum in data6:
+        result[datum["carpark_number"]] = datum["carpark_info"][0]["lots_available"]
 
     return result
 

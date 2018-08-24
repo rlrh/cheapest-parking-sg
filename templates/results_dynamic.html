@@ -10,6 +10,18 @@
 
 {% block style %}
     <style>
+        .event {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 150px;
+            bottom: 5px;
+            left: calc(50% - 2.5px);
+            content: " ";
+            display: block;
+            background: #f64747;
+        }
+
         .map-container {
             position: relative;
         }
@@ -53,10 +65,8 @@
                 left: 0;
             }
         }
-
-
     </style>
-    {% endblock %}
+{% endblock %}
 
 {% block navitems %}
     <li class="nav-item active">
@@ -76,19 +86,6 @@
 {% endblock %}
 
 {% block main %}
-    {#
-    {% if results|length > 1 %}
-
-    <div class="row mt-3">
-        <div class="col">
-            <h3>{{ results|length }} Results</h3>
-        </div>
-    </div>
-    <div class="form-row justify-content-start">
-    {% else %}
-    <div class="form-row mt-3 justify-content-start">
-    {% endif %}
-    #}
     <form method="GET" action="{{ url_for('cheapest') | safe }}">
     <div class="form-row mt-3 justify-content-start">
         <input name="lat" type="hidden" value="{{ search_params.center[0] | safe }}">
@@ -115,9 +112,17 @@
         <div class="col-auto d-flex flex-row align-items-center">
             <span class="lead text-justify d-none d-md-block">of</span>
             <span class="text-justify d-block d-md-none">of</span>
-            <span class="form-control form-control-sm bg-light mx-2 p-1">{{ search_params.place }}</span>
+            <span class="form-control form-control-sm bg-light ml-2 p-1">{{ search_params.place }}</span>
         </div>
         {% endif %}
+        <div class="col-auto d-flex flex-row align-items-center">
+            <span class="lead text-justify d-none d-md-block">by</span>
+            <span class="text-justify d-block d-md-none">by</span>
+            <select id="pricefirst" name="pricefirst" class="form-control form-control-sm mx-2 p-1">
+                <option value="1" selected>price</option>
+                <option value="0">distance</option>
+            </select>
+        </div>
         <div class="col-auto align-items-center">
             <button type="submit" class="btn btn-sm btn-success">Apply Changes</button>
         </div>
@@ -166,10 +171,16 @@
                                         <span>Distance</span>
                                         <span class="lead">{{ '%0.0f'| format(result[schema.distance]) }} m</span>
                                     </div>
-                                    {% if result[schema.lots] != -1 %}
+                                    {% if result[schema.lots] | int != -1 %}
                                     <div class="d-flex flex-column">
                                         <span>Lots</span>
+                                        {% if result[schema.lots] | int < 1 %}
+                                        <span class="text-danger lead">{{ result[schema.lots] }}</span>
+                                        {% elif result[schema.lots] | int < 10 %}
+                                        <span class="text-warning lead">{{ result[schema.lots] }}</span>
+                                        {% else %}
                                         <span class="text-success lead">{{ result[schema.lots] }}</span>
+                                        {% endif %}
                                     </div>
                                     {% endif %}
                                 </li>
@@ -181,11 +192,17 @@
                                 {% endif %}
                                 <li class="list-group-item d-flex justify-content-between">
                                     <a href="{{ url_for('browse', id=result[schema.index]) }}" class="card-link text-info"><i class="fas fa-info-circle"></i> More Info</a>
-                                    <a href="https://www.google.com/maps/dir/?api=1&destination={{result[schema.location][0]}},{{result[schema.location][1]}}&travelmode=driving" class="card-link text-info"><i class='fas fa-location-arrow'></i> Get Directions</a>
+                                    <a href="https://www.google.com/maps/dir/?api=1&destination={{result[schema.location][0]}},{{result[schema.location][1]}}&travelmode=driving" class="card-link text-info"><i class='fas fa-directions'></i> Get Directions</a>
                                 </li>
                             </ul>
                         </div>
                     </div>
+                    {% if loop.index == 1 %}
+                    <div class="col mb-3">
+                        <small>Share search results with others:</small>
+                        <div class="addthis_inline_share_toolbox"></div>
+                    </div>
+                    {% endif %}
                 {% endfor %}
                 {% if results|length == 0 %}
                     <div class="col mb-3">
@@ -197,97 +214,130 @@
                         </div>
                     </div>
                 {% endif %}
-                    <div class="col mb-3">
-                        <span class="text-muted"><small>Price may not include GST.</small></span>
-                        <p class="text-muted"><small>Distance as the crow flies.</small></p>
+                    <div class="col mb-2 d-flex flex-column">
+                        <small>Price may not include GST.</small>
+                        <small>Price for public holidays calulated based on Sunday parking rates.</small>
+                        <small>Distance as the crow flies.</small>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5b631941b7a10219"></script>
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    var holidays = {{ holidays | safe }};
 
-        // datetime pickers
-        var startPicker = flatpickr("#start",
-            {
-                enableTime: true,
-                dateFormat: "Y-m-dTH:i",
-                altInput: true,
-                altFormat: "D, j M Y, h:i K",
-                defaultDate: flatpickr.parseDate("{{ search_params.start }}", "Y-m-dTH:i"),
-                minDate: "today",
-                onChange: function (selectedDates, dateStr, instance) {
-                    if (endPicker.selectedDates[0] < selectedDates[0]) {
-                        endPicker.setDate(selectedDates[0], true);
+    // datetime pickers
+    var startPicker = flatpickr("#start",
+        {
+            enableTime: true,
+            dateFormat: "Y-m-dTH:i",
+            altInput: true,
+            altFormat: "D, j M Y, h:i K",
+            defaultDate: flatpickr.parseDate("{{ search_params.start }}", "Y-m-dTH:i"),
+            minDate: "today",
+            onChange: function (selectedDates, dateStr, instance) {
+                if (endPicker.selectedDates[0] < selectedDates[0]) {
+                    endPicker.setDate(selectedDates[0], true);
+                }
+            },
+            onDayCreate: function(dObj, dStr, fp, dayElem) {
+                // Utilize dayElem.dateObj, which is the corresponding Date
+                date_str = flatpickr.formatDate(dayElem.dateObj, "Y-m-d");
+                for (var i = 0; i < holidays.length; i++) {
+                    if (date_str == holidays[i]) {
+                        dayElem.innerHTML += "<span class='event'></span>";
                     }
                 }
-
-            });
-        var endPicker = flatpickr("#end",
-            {
-                enableTime: true,
-                dateFormat: "Y-m-dTH:i",
-                altInput: true,
-                altFormat: "D, j M Y, h:i K",
-                defaultDate: flatpickr.parseDate("{{ search_params.end }}", "Y-m-dTH:i"),
-                minDate: "today",
-                onChange: function (selectedDates, dateStr, instance) {
-                    if (selectedDates[0] < startPicker.selectedDates[0]) {
-                        startPicker.setDate(selectedDates[0], true);
+            }
+        });
+    var endPicker = flatpickr("#end",
+        {
+            enableTime: true,
+            dateFormat: "Y-m-dTH:i",
+            altInput: true,
+            altFormat: "D, j M Y, h:i K",
+            defaultDate: flatpickr.parseDate("{{ search_params.end }}", "Y-m-dTH:i"),
+            minDate: "today",
+            onChange: function (selectedDates, dateStr, instance) {
+                if (selectedDates[0] < startPicker.selectedDates[0]) {
+                    startPicker.setDate(selectedDates[0], true);
+                }
+            },
+            onDayCreate: function(dObj, dStr, fp, dayElem) {
+                // Utilize dayElem.dateObj, which is the corresponding Date
+                date_str = flatpickr.formatDate(dayElem.dateObj, "Y-m-d");
+                for (var i = 0; i < holidays.length; i++) {
+                    if (date_str == holidays[i]) {
+                        dayElem.innerHTML += "<span class='event'></span>";
                     }
                 }
-            });
+            }
+        });
+    {% if search_params.pricefirst | int == 0 %}
+    document.getElementById("pricefirst").selectedIndex = 1;
+    {% endif %}
 
-        // Initialize and add the map
-        var center = {lat: {{ search_params.center[0] }}, lng: {{ search_params.center[1] }}};
-        var map = new google.maps.Map(document.getElementById('map')); // ,{zoom: 15, center: center} to center
+    // Initialize and add the map
+    var center = {lat: {{ search_params.center[0] }}, lng: {{ search_params.center[1] }}};
+    var map = new google.maps.Map(document.getElementById('map'), {clickableIcons: false}); // ,{zoom: 15, center: center} to center
 
-        var markers = [];
-        var cluster_markers = [];
+    var markers = [];
+    var cluster_markers = [];
 
-        // The marker, positioned at center
-        var marker = new google.maps.Marker({position: center, map: map});
+    // The marker, positioned at center
+    var marker = new google.maps.Marker({position: center, map: map});
+    markers.push(marker);
+
+    {% for result in results %}
+        var info = "{% if result[schema.price] == -1 %}Closed{% else %}${{ '%0.2f'| format(result[schema.price]/100) }}{% endif %} {{ '%0.0f'| format(result[schema.distance]) }}m";
+        {% if loop.index == 1 and result[schema.price] != -1 %}
+        var style = "shadow p-1 mb-1 bg-success text-light rounded";
+        {% elif result[schema.price] == -1 %}
+        var style = "shadow p-1 mb-1 bg-danger text-light rounded";
+        {% else %}
+        var style = "shadow p-1 mb-1 bg-primary text-light rounded"
+        {% endif %}
+        var marker = new MarkerWithLabel({
+            {% if loop.index == 1 %}
+            map: map,
+            {% endif %}
+            position: {lat: {{ result[schema.location][0] }}, lng: {{ result[schema.location][1]}} },
+            label: String({{loop.index}}),
+            animation: google.maps.Animation.DROP,
+            labelContent: info,
+            labelAnchor: new google.maps.Point(22, 0),
+            labelClass: style, // the CSS class for the label
+            labelStyle: {opacity: 1.0}
+        });
+        marker.addListener('click', function() {
+            var element = document.getElementById("card{{ loop.index }}");
+            element.scrollIntoView({behavior: "smooth"});
+        });
         markers.push(marker);
+        {% if loop.index != 1 %}
+        cluster_markers.push(marker)
+        {% endif %}
+    {% endfor %}
 
-        {% for result in results %}
-            var info = "{% if result[schema.price] == -1 %}Closed{% else %}${{ '%0.2f'| format(result[schema.price]/100) }}{% endif %} {{ '%0.0f'| format(result[schema.distance]) }}m";
-            {% if loop.index == 1 and result[schema.price] != -1 %}
-            var style = "shadow p-1 mb-1 bg-success text-light rounded";
-            {% elif result[schema.price] == -1 %}
-            var style = "shadow p-1 mb-1 bg-danger text-light rounded";
-            {% else %}
-            var style = "shadow p-1 mb-1 bg-primary text-light rounded"
-            {% endif %}
-            var marker = new MarkerWithLabel({
-                position: {lat: {{ result[schema.location][0] }}, lng: {{ result[schema.location][1]}} },
-                label: String({{loop.index}}),
-                animation: google.maps.Animation.DROP,
-                labelContent: info,
-                labelAnchor: new google.maps.Point(22, 0),
-                labelClass: style, // the CSS class for the label
-                labelStyle: {opacity: 1.0}
-            });
-            marker.addListener('click', function() {
-                var element = document.getElementById("card{{ loop.index }}");
-                element.scrollIntoView({behavior: "smooth"});
-            });
-            markers.push(marker);
-            {% if loop.index != 1 %}
-            cluster_markers.push(marker)
-            {% endif %}
-        {% endfor %}
+    var markerCluster = new MarkerClusterer(map, cluster_markers, {maxZoom: 17, averageCenter: true, imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
 
-        var markerCluster = new MarkerClusterer(map, cluster_markers, {maxZoom: 15, imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+    // Fit map to markers
+    var bound = new google.maps.LatLngBounds();
+    for(var i in markers) {
+        bound.extend(markers[i].getPosition());
+    }
+    map.fitBounds(bound);
 
-        // Fit map to markers
-        var bound = new google.maps.LatLngBounds();
-        for(var i in markers) {
-            bound.extend(markers[i].getPosition());
-        }
-        map.fitBounds(bound);
+    function center_to_marker(index, map) {
+        map.setCenter(markers[index].getPosition());
+        map.setZoom(17);
+    }
 
-    }, false);
+    var numbers = document.querySelectorAll('h1'), i;
+
+    for (i = 0; i < numbers.length; i++) {
+        numbers[i].addEventListerner("click", center_to_marker(i, map));
+    }
     </script>
-
 {% endblock %}
